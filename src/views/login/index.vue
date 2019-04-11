@@ -38,7 +38,7 @@
 
 <script>
 import { isvalidUsername } from '@/utils/validate'
-
+import Cookie from 'js-cookie'
 export default {
   name: 'Login',
   data() {
@@ -87,10 +87,12 @@ export default {
       }
     },
     handleLogin() {
+      Cookie.set('hello', '123')
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
           this.$store.dispatch('Login', this.loginForm).then(() => {
+            console.log('234')
             this.loading = false
             this.$router.push({ path: this.redirect || '/' })
           }).catch(() => {
