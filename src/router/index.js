@@ -45,43 +45,128 @@ export const constantRouterMap = [
   },
 
   {
-    path: '/example',
+    path: '/archive',
     component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: '信息管理', icon: 'example' },
+    redirect: '/archive/villagerTable',
+    name: 'Archive',
+    meta: { title: '档案管理', icon: 'example' },
     children: [
       {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: '村民信息管理', icon: 'table' }
+        path: 'villagerTable',
+        name: 'VillagerTable',
+        component: () => import('@/views/vliiager_table/index'),
+        meta: { title: '村民信息', icon: 'table' }
       },
 
       {
-        path: 'villagetable',
-        name: 'VillageTable',
-        component: () => import('@/views/towntable/index'),
-        meta: { title: '乡镇信息管理', icon: 'table' }
+        path: 'townTable',
+        name: 'TownTable',
+        component: () => import('@/views/town_table/index'),
+        meta: { title: '乡镇信息', icon: 'table' }
       },
       {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
+        path: 'villageTable',
+        name: 'VillageTable',
+        component: () => import('@/views/village_table/index'),
+        meta: { title: '村信息', icon: 'table' }
+      },
+      {
+        path: 'departmentTable',
+        name: 'DepartmentTable',
+        component: () => import('@/views/department_table/index'),
+        meta: { title: '组织机构信息', icon: 'table' }
+      },
+      {
+        path: 'familyTable',
+        name: 'FamilyTable',
+        component: () => import('@/views/family_table/index'),
+        meta: { title: '家庭信息', icon: 'table' }
+      },
+      {
+        path: 'memberTable',
+        name: 'MemberTable',
+        component: () => import('@/views/member_table/index'),
+        meta: { title: '人员信息', icon: 'table' }
+      },
+      {
+        path: 'partyMemberTable',
+        name: 'PartyMemberTable',
+        component: () => import('@/views/party_member_table/index'),
+        meta: { title: '党员信息', icon: 'table' }
+      },
+      {
+        path: 'nonOperatingAssetsTable',
+        name: 'NonOperatingAssetsTable',
+        component: () => import('@/views/non_operating_assets_table/index'),
+        meta: { title: '非经营性资产信息', icon: 'table' }
       }
     ]
   },
-
   {
-    path: '/form',
+    path: '/basic',
+    redirect: '/basic/adminlayout',
+    name: 'Basic',
     component: Layout,
+    meta: { title: '基本信息管理', icon: 'example' },
     children: [
       {
-        path: 'index',
-        name: 'Form',
-        component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
+        path: 'adminLayout',
+        name: 'AdminLayout',
+        component: () => import('@/views/admin_layout/index'),
+        meta: { title: '行政区划管理', icon: 'table' }
+      },
+      {
+        path: 'dataDictionary',
+        name: 'DataDictionary',
+        component: () => import('@/views/data_dictionary/index'),
+        meta: { title: '数据字典管理', icon: 'form' }
+      }
+    ]
+  },
+  {
+    path: '/system',
+    redirect: '/system/userInfo',
+    name: 'System',
+    component: Layout,
+    meta: { title: '系统管理', icon: '系统配置' },
+    children: [
+      {
+        path: 'userInfo',
+        name: 'UserInfo',
+        component: () => import('@/views/userinfo/index'),
+        meta: { title: '信息管理', icon: '用户' },
+        children: [
+          {
+            path: 'password',
+            component: () => import('@/views/userinfo/password/index'),
+            name: 'Password',
+            meta: { title: '修改密码', icon: '密码' }
+          },
+          {
+            path: 'basicInfo',
+            component: () => import('@/views/userinfo/basic_info/index'),
+            name: 'BasicInfo',
+            meta: { title: '基本信息', icon: 'example' }
+          }
+        ]
+      },
+      {
+        path: 'userTable',
+        name: 'UserTable',
+        component: () => import('@/views/user_table/index'),
+        meta: { title: '用户信息管理', icon: '表格' }
+      },
+      {
+        path: 'roleTable',
+        name: 'RoleTable',
+        component: () => import('@/views/role_table/index'),
+        meta: { title: '角色管理', icon: '表格' }
+      },
+      {
+        path: 'authTable',
+        name: 'AuthTable',
+        component: () => import('@/views/auth_table/index'),
+        meta: { title: '授权管理', icon: '授权' }
       }
     ]
   },

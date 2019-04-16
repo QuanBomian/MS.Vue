@@ -3,28 +3,10 @@
     <div style="margin-top: 15px;">
       <el-row :gutter="10" style="margin-buttom: 15px;" type="flex">
         <el-col :span="6">
-          <el-input v-model="search.townName" placeholder="请输入乡镇名" clearable/>
-        </el-col>
-
-        <el-col :span="10">
-          <el-input v-model="search.address" placeholder="请输入地址"/>
-        </el-col>
-        <el-col :span="8">
-          <el-input v-model="search.mayorName" placeholder="请输入镇长姓名"/>
+          <el-input v-model="search.userName" placeholder="用户名" clearable/>
         </el-col>
       </el-row>
-      <el-row :gutter="8" style="margin-top: 15px;">
-        <el-col :span="8">
-          <el-input v-model="secretaryName" placeholder="请输入党委书记姓名"/>
-        </el-col>
-        <el-col :span="8">
-          <el-input v-model="search.chairmanName" placeholder="请输入人大委员长姓名" clearable/>
-        </el-col>
 
-        <el-col :span="8">
-          <el-input v-model="search.contactPhone" placeholder="请输入联系电话" clearable/>
-        </el-col>
-      </el-row>
       <el-row :gutter="5" style="margin-top: 15px;">
         <el-col :span="2">
           <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
@@ -46,28 +28,13 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="ID" width="80">
-        <template slot-scope="scope">{{ scope.$index }}</template>
+      <el-table-column label="用户名" width="160" align="center">
+        <template slot-scope="scope">{{ scope.row.user.userName }}</template>
       </el-table-column>
-      <el-table-column label="乡镇名" width="160" align="center">
-        <template slot-scope="scope">{{ scope.row.townName }}</template>
+      <el-table-column label="授权" width="500" align="center">
+        <template slot-scope="scope">{{ scope.row.role.roleName }}</template>
       </el-table-column>
-      <el-table-column label="地址" width="240" align="center">
-        <template slot-scope="scope">{{ scope.row.address }}</template>
-      </el-table-column>
-      <el-table-column label="镇长姓名" width="100" align="center">
-        <template slot-scope="scope">{{ scope.row.mayorName }}</template>
-      </el-table-column>
-      <el-table-column label="党委书记姓名" width="120" align="center">
-        <template slot-scope="scope">{{ scope.row.secretaryName }}</template>
-      </el-table-column>
-      <el-table-column label="人大委员长姓名" width="120" align="center">
-        <template slot-scope="scope">{{ scope.row.chairmanName }}</template>
-      </el-table-column>
-      <el-table-column label="联系电话" width="140" align="center">
-        <template slot-scope="scope">{{ scope.row.contactPhone }}</template>
-      </el-table-column>
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" fixed="right" width="200">
         <template slot-scope="scope">
           <el-button
             size="small"
@@ -81,23 +48,11 @@
     <!-- 模态框 -->
     <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="乡镇信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
-        <el-form-item :label-width="formLabelWidth" label="乡镇名" prop="townName">
-          <el-input v-model="form.townName" auto-complete="off" placeholder="乡镇名"/>
+        <el-form-item :label-width="formLabelWidth" label="用户名" prop="userName">
+          <el-input v-model="form.user.userName" auto-complete="off" placeholder="用户名"/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="地址" prop="address">
-          <el-input v-model="form.address" auto-complete="off" placeholder="地址"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="镇长姓名" prop="mayorName">
-          <el-input v-model="form.mayorName" auto-complete="off" placeholder="镇长姓名"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="党委书记姓名" prop="secretaryName">
-          <el-input v-model="form.secretaryName" auto-complete="off" placeholder="党委书记姓名"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="人大委员长姓名" prop="chairmanName">
-          <el-input v-model="form.chairmanName" auto-complete="off" placeholder="人大委员长姓名"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="联系电话" prop="contactPhone">
-          <el-input v-model="form.contactPhone" auto-complete="off" placeholder="联系电话"/>
+        <el-form-item :label-width="formLabelWidth" label="密码" prop="roleName">
+          <el-input v-model="form.role.roleName" auto-complete="off" placeholder="密码"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -110,7 +65,13 @@
 </template>
 
 <script>
-import { getList, deleteItem, updateItem, createItem, query } from '@/api/town'
+import {
+  getList,
+  deleteItem,
+  updateItem,
+  createItem,
+  query
+} from '@/api/auth_user'
 import moment from 'moment'
 export default {
   filters: {
@@ -122,21 +83,6 @@ export default {
     }
   },
   data() {
-    var checkNum = (rule, value, callback) => {
-      if (!value) {
-        return new Error('请输入收入')
-      } else {
-        if (isNaN(value)) {
-          callback(new Error('请输入数字'))
-        } else {
-          if (value < 0) {
-            callback(new Error('不能小于0'))
-          } else {
-            callback()
-          }
-        }
-      }
-    }
     return {
       originList: null,
       list: null,
@@ -146,20 +92,19 @@ export default {
       isEdit: true,
       editIndex: null,
       search: {
-        townName: null,
-        address: null,
-        majorName: null,
-        secretaryName: null,
-        chairmanName: null,
-        contactPhone: null
+        username: null
       },
       form: {
-        townName: '',
-        address: '',
-        majorName: '',
-        secretaryName: '',
-        chairmanName: '',
-        contactPhone: '',
+        user: {
+          id: '',
+          userName: ''
+        },
+        role: {
+          id: '',
+          roleName: ''
+        },
+        userId: '',
+        roleId: '',
         id: ''
       },
 
@@ -178,7 +123,7 @@ export default {
         mayorName: [
           {
             required: true,
-            message: '请输入家庭住址',
+            message: '请输入镇长姓名',
             trigger: 'blur'
           }
         ],
@@ -211,6 +156,7 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true
+      console.log('123')
       getList().then(response => {
         this.list = response.items
         this.originList = response.items

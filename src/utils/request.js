@@ -54,7 +54,6 @@ service.interceptors.response.use(
           })
         })
       }
-      console.log('hjajfhj')
       return Promise.reject('error')
     } else {
       return response.data

@@ -2,27 +2,38 @@ import request from '@/utils/request'
 
 export function login(username, password) {
   return request({
-    url: '/Users/login',
-    method: 'get',
-    params: {
+    url: '/Secret/token',
+    method: 'post',
+    data: {
       username,
       password
     }
   })
 }
 
-export function getInfo(token) {
+// export function getInfo(token) {
+//   return request({
+//     url: '/Secret/info',
+//     method: 'get',
+//     params: { token }
+//   })
+// }
+
+export function logout() {
   return request({
-    url: '/Users/info',
-    method: 'get',
-    params: { token }
+    url: '/Secret/deactivate',
+    method: 'post'
   })
 }
 
-export function logout(token) {
+export function refresh(username, password, token) {
   return request({
-    url: '/Users/logout',
+    url: '/Secret/refresh',
     method: 'post',
-    params: { token }
+    data: {
+      username,
+      password,
+      token
+    }
   })
 }

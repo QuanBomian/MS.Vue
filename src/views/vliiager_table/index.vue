@@ -9,7 +9,7 @@
         <el-col :span="6">
           <el-date-picker
             v-model="search.birthdayFrom"
-            :picker-options="pickerOptions0"
+            :picker-options="pickerOptions"
             type="date"
             placeholder="选择开始日期"
           />
@@ -17,7 +17,7 @@
         <el-col :span="6">
           <el-date-picker
             v-model="search.birthdayTo"
-            :picker-options="pickerOptions0"
+            :picker-options="pickerOptions"
             type="date"
             placeholder="选择结束日期"
           />
@@ -129,7 +129,7 @@
       <el-table-column label="有无犯罪记录" width="120" align="center">
         <template slot-scope="scope">{{ scope.row.havingCriminalRecord | recordString }}</template>
       </el-table-column>
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" fixed="right" width="200">
         <template slot-scope="scope">
           <el-button
             size="small"
@@ -292,8 +292,9 @@ export default {
         homeAddress: [
           {
             required: true,
-            message: '请输入家庭住址'
-            // trigger: "blur"
+            max: 100,
+            message: '请输入家庭住址',
+            trigger: 'blur'
           }
         ],
         education: [
@@ -368,7 +369,7 @@ export default {
           label: '离婚'
         }
       ],
-      pickerOptions0: {
+      pickerOptions: {
         disabledDate(time) {
           return time.getTime() > Date.now()
         }

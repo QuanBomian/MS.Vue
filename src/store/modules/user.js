@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/login'
+import { login, logout } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
@@ -27,52 +27,57 @@ const user = {
   actions: {
     // 登录
     Login({ commit }, userInfo) {
-      const username = userInfo.username.trim()
       return new Promise((resolve, reject) => {
-        login(username, userInfo.password).then(response => {
-          const data = response
-          setToken(data.token)
-          console.log('123')
-          commit('SET_TOKEN', data.token)
-          resolve()
-        }).catch(error => {
-          console.log('err' + error)
-          reject(error)
-        })
+        login(userInfo.username, userInfo.password)
+          .then(response => {
+            const data = response.data
+            setToken(data.access)
+            commit('SET_TOKEN', data.access)
+            commit('SET_NAME', data.profile.userName)
+            commit('SET_ROLE', ['123'])
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
       })
     },
 
-    // 获取用户信息
-    GetInfo({ commit, state }) {
-      return new Promise((resolve, reject) => {
-        getInfo(state.token).then(response => {
-          const data = response
-          console.log('getInfo', data)
-          if (data.userInfo.roleNames && data.userInfo.roleNames.length > 0) { // 验证返回的roles是否是一个非空数组
-            commit('SET_ROLES', data.userInfo.roleNames)
-          } else {
-            reject('getInfo: roles must be a non-null array !')
-          }
-          //  commit('SET_NAME', data.name)
-          //  commit('SET_AVATAR', data.avatar)
-          resolve(response)
-        }).catch(error => {
-          reject(error)
-        })
-      })
-    },
+    // // 获取用户信息
+    // GetInfo({ commit, state }) {
+    //   return new Promise((resolve, reject) => {
+    //     getInfo(state.token)
+    //       .then(response => {
+    //         const data = response
+    //         if (data.userInfo.roleNames && data.userInfo.roleNames.length > 0) {
+    //           // 验证返回的roles是否是一个非空数组
+    //           commit('SET_ROLES', data.userInfo.roleNames)
+    //         } else {
+    //           reject('getInfo: roles must be a non-null array !')
+    //         }
+    //         //  commit('SET_NAME', data.name)
+    //         //  commit('SET_AVATAR', data.avatar)
+    //         resolve(response)
+    //       })
+    //       .catch(error => {
+    //         reject(error)
+    //       })
+    //   })
+    // },
 
     // 登出
     LogOut({ commit, state }) {
       return new Promise((resolve, reject) => {
-        logout(state.token).then(() => {
-          commit('SET_TOKEN', '')
-          commit('SET_ROLES', [])
-          removeToken()
-          resolve()
-        }).catch(error => {
-          reject(error)
-        })
+        logout(state.token)
+          .then(() => {
+            commit('SET_TOKEN', '')
+            commit('SET_ROLES', [])
+            removeToken()
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
       })
     },
 
