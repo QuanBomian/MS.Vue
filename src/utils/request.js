@@ -2,7 +2,7 @@ import axios from 'axios'
 import { Message, MessageBox } from 'element-ui'
 import store from '../store'
 import { getToken } from '@/utils/auth'
-
+import router from '../router'
 // 创建axios实例
 const service = axios.create({
   baseURL: process.env.BASE_API, // api 的 base_url
@@ -13,7 +13,38 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     if (store.getters.token) {
-      config.headers['Authorization'] = 'Bearer ' + getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
+      config.headers['Authorization'] = 'Bearer ' + getToken()
+      if (
+        config.url !== '/Secret/userInfo' &&
+        config.url !== '/Secret/token' &&
+        config.url !== '/Secret/deactivate' &&
+        config.url !== '/Secret/refresh'
+      ) {
+        if (store.getters.expTime <= Date.now()) {
+          console.log('2  ' + store.getters.expTime)
+          Message({
+            type: 'warning',
+            message: 'Authrozation outdated'
+          })
+          store
+            .dispatch('FedLogOut')
+            .then(() => {
+              console.log('logout')
+              router.push({ path: '/' })
+            })
+            .catch(err => Message.error(err))
+        } else if (store.getters.expTime - Date.now() < 120000) {
+          store
+            .dispatch('Refresh')
+            .then(() => {
+              config.headers['Authorization'] = 'Bearer ' + getToken()
+            })
+            .catch(error => {
+              Message.error(error)
+            })
+        }
+      }
+      // 让每个请求携带自定义token 请根据实际情况自行修改
     }
     return config
   },

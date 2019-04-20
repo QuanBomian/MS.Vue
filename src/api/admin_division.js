@@ -22,7 +22,7 @@ export function deleteItem(id) {
 
 export function updateItem(item) {
   return request({
-    url: '/AdminDivisions/' + item.id,
+    url: '/AdminDivisions/',
     method: 'put',
     data: item
   })

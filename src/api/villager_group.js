@@ -2,21 +2,21 @@ import request from '@/utils/request'
 
 export function getList() {
   return request({
-    url: '/DataItems',
+    url: '/VillagerGroups',
     method: 'get'
   })
 }
 
 export function deleteItem(id) {
   return request({
-    url: '/DataItems/' + id,
+    url: '/VillagerGroups/' + id,
     method: 'delete'
   })
 }
 
 export function updateItem(item) {
   return request({
-    url: '/DataItems/',
+    url: '/VillagerGroups/',
     method: 'put',
     data: item
   })
@@ -24,7 +24,7 @@ export function updateItem(item) {
 
 export function createItem(item) {
   return request({
-    url: '/DataItems/',
+    url: '/VillagerGroups/',
     method: 'post',
     data: item
   })
@@ -32,7 +32,7 @@ export function createItem(item) {
 
 export function query(condition) {
   return request({
-    url: '/DataItems',
+    url: '/VillagerGroups/condition',
     method: 'get',
     params: condition
   })

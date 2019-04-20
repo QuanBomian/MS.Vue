@@ -22,7 +22,7 @@ export function deleteItemOfDataItem(id) {
 
 export function updateItemOfDataItem(item) {
   return request({
-    url: '/DataItems/' + item.id,
+    url: '/DataItems/',
     method: 'put',
     data: item
   })
@@ -38,10 +38,17 @@ export function createItemOfDataItem(item) {
 
 export function getListsByCategroyId(id) {
   return request({
-    url: '/DataItems/condition',
+    url: '/DataItems',
     method: 'get',
     params: {
       categroyCode: id
     }
+  })
+}
+export function queryItemOfDataItem(condition) {
+  return request({
+    url: '/DataItems',
+    method: 'get',
+    params: condition
   })
 }

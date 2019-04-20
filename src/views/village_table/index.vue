@@ -7,15 +7,15 @@
         </el-col>
 
         <el-col :span="10">
-          <el-input v-model="search.address" placeholder="请输入地址"/>
+          <el-input v-model="search.address" placeholder="请输入地址" clearable/>
         </el-col>
         <el-col :span="8">
-          <el-input v-model="search.mayorName" placeholder="请输入镇长姓名"/>
+          <el-input v-model="search.mayorName" placeholder="请输入镇长姓名" clearable/>
         </el-col>
       </el-row>
       <el-row :gutter="8" style="margin-top: 15px;">
         <el-col :span="8">
-          <el-input v-model="search.secretaryName" placeholder="请输入党委书记姓名"/>
+          <el-input v-model="search.secretaryName" placeholder="请输入党委书记姓名" clearable/>
         </el-col>
         <el-col :span="8">
           <el-input v-model="search.villageHeadName" placeholder="请输入镇长姓名" clearable/>
@@ -27,26 +27,35 @@
       </el-row>
       <el-row :gutter="8" style="margin-top: 15px;">
         <el-col :span="8">
-          <el-input v-model="search.areaNumber" placeholder="请输入行政编码"/>
+          <el-input v-model="search.areaNumber" placeholder="请输入行政编码" clearable/>
         </el-col>
         <el-col :span="8">
-          <el-input v-model="search.highAreaNumber" placeholder="请输入行政编码"/>
+          <el-input v-model="search.highAreaNumber" placeholder="请输入行政编码" clearable/>
         </el-col>
         <el-col :span="8">
-          <el-select v-model="search.governmentLevel" placeholder="请输入行政级别" clearable>
+          <el-select v-model="search.governmentLevel" placeholder="请选择行政级别" clearable>
             <el-option
-              v-for="item in options"
+              v-for="item in options1"
               :key="item.value"
               :label="item.label"
               :value="item.value"
             />
           </el-select>
         </el-col>
-        <el-col :span="4">
-          <el-input v-model="search.urbanRuralClassification" placeholder="请输入城乡分类"/>
+      </el-row>
+      <el-row :gutter="5" style="margin-top: 15px;">
+        <el-col :span="6">
+          <el-select v-model="search.urbanRuralClassification" placeholder="请选择城乡分类" clearable>
+            <el-option
+              v-for="item in options2"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-col>
-        <el-col :span="4">
-          <el-input v-model="search.groupCount" placeholder="请输入村民小组数量"/>
+        <el-col :span="6">
+          <el-input v-model="search.groupCount" placeholder="请输入村民小组数量" clearable/>
         </el-col>
       </el-row>
       <el-row :gutter="5" style="margin-top: 15px;">
@@ -76,8 +85,8 @@
       <el-table-column label="行政编码" width="160" align="center">
         <template slot-scope="scope">{{ scope.row.areaNumber }}</template>
       </el-table-column>
-      <el-table-column label="行政级别" width="100" align="center">
-        <template slot-scope="scope">{{ scope.row.governmentLevel }}</template>
+      <el-table-column label="行政级别" width="140" align="center">
+        <template slot-scope="scope">{{ scope.row.governmentLevel|governmentLevelString }}</template>
       </el-table-column>
       <el-table-column label="地址" width="240" align="center">
         <template slot-scope="scope">{{ scope.row.address }}</template>
@@ -109,13 +118,16 @@
       </el-table-column>
     </el-table>
     <!-- 模态框 -->
-    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="乡镇信息">
+    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="村信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
         <el-form-item :label-width="formLabelWidth" label="村名" prop="villageName">
           <el-input v-model="form.villageName" auto-complete="off" placeholder="村名"/>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="地址" prop="address">
           <el-input v-model="form.address" auto-complete="off" placeholder="地址"/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="上级行政区编码" prop="highLevelAreaNumber">
+          <el-input v-model="form.highLevelAreaNumber" auto-complete="off" placeholder="上级行政区行政编码"/>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="行政编码" prop="areaNumber">
           <el-input v-model="form.areaNumber" auto-complete="off" placeholder="行政编码"/>
@@ -130,11 +142,14 @@
           <el-input v-model="form.secretaryName" auto-complete="off" placeholder="党委书记姓名"/>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="城乡分类" prop="urbanRuralClassification">
-          <el-input
-            v-model="form.urbanRuralClassification"
-            auto-complete="off"
-            placeholder="人大委员长姓名"
-          />
+          <el-select v-model="form.urbanRuralClassification" placeholder="请选择城乡分类" clearable>
+            <el-option
+              v-for="item in options2"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="村民小组数量" prop="groupCount">
           <el-input v-model="form.groupCount" auto-complete="off" placeholder="村民小组数量"/>
@@ -160,8 +175,33 @@ import {
   createItem,
   query
 } from '@/api/village'
+var governmentLevelMap = new Map([
+  [1, '省级'],
+  [2, '地级'],
+  [3, '县级'],
+  [4, '乡级'],
+  [5, '村级']
+])
 export default {
+  filters: {
+    governmentLevelString(oldVal) {
+      return governmentLevelMap.get(oldVal)
+    }
+  },
   data() {
+    var checkPhone = (rule, value, callback) => {
+      var reg = /^((0\d{2,3})-)(\d{7,8})(-(\d{3,}))?$/
+      if (!value) {
+        callback(new Error('请输入联系电话'))
+      }
+      setTimeout(() => {
+        if (reg.test(value)) {
+          callback()
+        } else {
+          callback('请输入正确的格式：0区号-8位或7位号码[-分机号]')
+        }
+      }, 100)
+    }
     return {
       originList: null,
       list: null,
@@ -170,7 +210,7 @@ export default {
       dialogFormVisible: false,
       isEdit: true,
       editIndex: null,
-      options: [
+      options1: [
         {
           value: 1,
           label: '省级'
@@ -192,10 +232,36 @@ export default {
           label: '村级'
         }
       ],
+      options2: [
+        {
+          value: 111,
+          label: '主城区'
+        },
+        {
+          value: 112,
+          label: '城乡结合区'
+        },
+        {
+          value: 121,
+          label: '镇中心区'
+        },
+        {
+          value: 123,
+          label: '特殊区域'
+        },
+        {
+          value: 210,
+          label: '乡中心区'
+        },
+        {
+          value: 220,
+          label: '村庄'
+        }
+      ],
       search: {
         villageName: null,
         address: null,
-        majorName: null,
+        villageHeadName: null,
         secretaryName: null,
         highLevelAreaNumber: null,
         urbanRuralClassification: null,
@@ -212,16 +278,15 @@ export default {
         groupCount: null,
         governmentLevel: null,
         address: '',
-        majorName: '',
+        villageHeadName: '',
         secretaryName: '',
-        chairmanName: '',
         contactPhone: '',
         id: ''
       },
 
       rules: {
-        townName: [
-          { required: true, message: '请输入乡镇名', trigger: 'blur' }
+        villageName: [
+          { required: true, message: '请输入村名', trigger: 'blur' }
         ],
 
         address: [
@@ -232,10 +297,10 @@ export default {
             trigger: 'blur'
           }
         ],
-        areaNumer: [
+        areaNumber: [
           {
             required: true,
-            max: 12,
+            max: 15,
             message: '请输入行政区划编码',
             trigger: 'blur'
           }
@@ -243,14 +308,15 @@ export default {
         governmentLevel: [
           {
             required: true,
-            message: '请输入行政级别'
+            message: '请输入行政级别',
+            trigger: 'blur'
           }
         ],
-        mayorName: [
+        villageHeadName: [
           {
             required: true,
             min: 2,
-            message: '请输入镇长姓名',
+            message: '请输入村长姓名',
             trigger: 'blur'
           }
         ],
@@ -269,20 +335,38 @@ export default {
             message: '请输入人大委员长姓名',
             trigger: 'blur'
           }
+        ],
+        urbanRuralClassification: [
+          {
+            required: true,
+            message: '请选择城乡分类',
+            trigger: 'change'
+          }
+        ],
+        contactPhone: [
+          {
+            required: true,
+            message: '请输入联系电话',
+            trigger: 'blur'
+          },
+          {
+            validator: checkPhone,
+            trigger: 'blur'
+          }
         ]
       },
       formLabelWidth: '120px'
-    }
-  },
-  watch: {
-    dialogFormVisible: function(val, oldVla) {
-      this.$refs['ruleForm'].resetFields()
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    clearValidation() {
+      if (this.$refs['ruleForm'] !== undefined) {
+        this.$refs['ruleForm'].clearValidate()
+      }
+    },
     fetchData() {
       this.listLoading = true
       getList().then(response => {
@@ -292,7 +376,7 @@ export default {
       })
     },
     handleEdit() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           updateItem(this.form)
@@ -338,6 +422,7 @@ export default {
     },
 
     openDialogForEdit(index, obj) {
+      this.clearValidation()
       this.isEdit = true
       this.editIndex = index
       this.form = Object.assign({}, obj)
@@ -351,7 +436,7 @@ export default {
       })
     },
     handleCreate() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           createItem(this.form)
@@ -374,7 +459,9 @@ export default {
       })
     },
     openDialogForCreate() {
+      this.clearValidation()
       this.form = {}
+      console.log(this.form)
       this.isEdit = false
       this.dialogFormVisible = true
     },

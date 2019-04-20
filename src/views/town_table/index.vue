@@ -40,7 +40,7 @@
           </el-select>
         </el-col>
       </el-row>
-      <el-row :gutter="5" style="margin-top: 15px;">
+      <el-row :gutter="5" style="margin-top: 30px;">
         <el-col :span="2">
           <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         </el-col>
@@ -138,16 +138,7 @@
 
 <script>
 import { getList, deleteItem, updateItem, createItem, query } from '@/api/town'
-import moment from 'moment'
 export default {
-  filters: {
-    dateString(value, format) {
-      return moment(value).format(format || 'YYYY年M月D日')
-    },
-    recordString(value) {
-      return value === true ? '是' : '否'
-    }
-  },
   data() {
     return {
       originList: null,
@@ -238,15 +229,15 @@ export default {
       formLabelWidth: '120px'
     }
   },
-  watch: {
-    dialogFormVisible: function(val, oldVla) {
-      this.$refs['ruleForm'].resetFields()
-    }
-  },
   created() {
     this.fetchData()
   },
   methods: {
+    clearValidation() {
+      if (this.$refs['ruleForm'] !== undefined) {
+        this.$refs['ruleForm'].clearValidate()
+      }
+    },
     fetchData() {
       this.listLoading = true
       getList().then(response => {
@@ -256,7 +247,7 @@ export default {
       })
     },
     handleEdit() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           updateItem(this.form)
@@ -305,6 +296,7 @@ export default {
       this.isEdit = true
       this.editIndex = index
       this.form = Object.assign({}, obj)
+      this.clearValidation()
       this.dialogFormVisible = true
     },
     handleSearch() {
@@ -315,7 +307,7 @@ export default {
       })
     },
     handleCreate() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           createItem(this.form)
@@ -339,6 +331,7 @@ export default {
     },
     openDialogForCreate() {
       this.form = {}
+      this.clearValidation()
       this.isEdit = false
       this.dialogFormVisible = true
     },

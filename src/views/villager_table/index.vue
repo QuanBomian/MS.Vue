@@ -276,7 +276,6 @@ export default {
         ],
         birthday: [
           {
-            type: 'date',
             required: true,
             message: '请选择日期',
             trigger: 'blur'
@@ -409,7 +408,7 @@ export default {
       })
     },
     handleEdit() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           updateItem(this.form)
@@ -458,6 +457,7 @@ export default {
       this.isEdit = true
       this.editIndex = index
       this.form = Object.assign({}, obj)
+      this.clearValidation()
       this.dialogFormVisible = true
     },
     handleSearch() {
@@ -468,7 +468,7 @@ export default {
       })
     },
     handleCreate() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           createItem(this.form)
@@ -492,6 +492,7 @@ export default {
     },
     openDialogForCreate() {
       this.form = {}
+      this.clearValidation()
       this.isEdit = false
       this.dialogFormVisible = true
     },
@@ -501,6 +502,11 @@ export default {
           done()
         })
         .catch(_ => {})
+    },
+    clearValidation() {
+      if (this.$refs['ruleForm'] !== undefined) {
+        this.$refs['ruleForm'].clearValidate()
+      }
     }
   }
 }

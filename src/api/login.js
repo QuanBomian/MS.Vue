@@ -11,13 +11,13 @@ export function login(username, password) {
   })
 }
 
-// export function getInfo(token) {
-//   return request({
-//     url: '/Secret/info',
-//     method: 'get',
-//     params: { token }
-//   })
-// }
+export function getInfo(token) {
+  return request({
+    url: '/Secret/userInfo',
+    method: 'get',
+    params: { token }
+  })
+}
 
 export function logout() {
   return request({
@@ -26,14 +26,22 @@ export function logout() {
   })
 }
 
-export function refresh(username, password, token) {
+export function refresh(username, token) {
   return request({
     url: '/Secret/refresh',
     method: 'post',
     data: {
       username,
-      password,
       token
+    }
+  })
+}
+export function validate(token) {
+  return request({
+    url: '/Secret/validate',
+    method: 'get',
+    params: {
+      token: token
     }
   })
 }

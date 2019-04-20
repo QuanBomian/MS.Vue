@@ -16,7 +16,7 @@ export function deleteItemOfDataCategroy(id) {
 
 export function updateItemOfDataCategroy(item) {
   return request({
-    url: '/DataCategroys/' + item.id,
+    url: '/DataCategroys/',
     method: 'put',
     data: item
   })
@@ -27,5 +27,13 @@ export function createItemOfDataCategroy(item) {
     url: '/DataCategroys/',
     method: 'post',
     data: item
+  })
+}
+
+export function queryOfDataCategroy(item) {
+  return request({
+    url: '/DataCategroys',
+    method: 'get',
+    params: item
   })
 }

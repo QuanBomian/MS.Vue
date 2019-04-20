@@ -25,9 +25,6 @@
           <el-input v-model="search.email" placeholder="请输入电子邮箱" clearable/>
         </el-col>
       </el-row>
-      <el-row :gutter="8" style="margin-top: 15px;">
-        <el-input :rows="3" v-model="search.notes" type="textarea" placeholder="请输入备注"/>
-      </el-row>
       <el-row :gutter="5" style="margin-top: 15px;">
         <el-col :span="2">
           <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
@@ -49,9 +46,6 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="ID" width="80">
-        <template slot-scope="scope">{{ scope.$index }}</template>
-      </el-table-column>
       <el-table-column label="部门名" width="200" align="center">
         <template slot-scope="scope">{{ scope.row.departmentName }}</template>
       </el-table-column>
@@ -85,7 +79,7 @@
       </el-table-column>
     </el-table>
     <!-- 模态框 -->
-    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="乡镇信息">
+    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="组织机构信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
         <el-form-item :label-width="formLabelWidth" label="部门名" prop="departmentName">
           <el-input v-model="form.departmentName" auto-complete="off" placeholder="村名"/>
@@ -258,11 +252,6 @@ export default {
       formLabelWidth: '120px'
     }
   },
-  watch: {
-    dialogFormVisible: function(val, oldVla) {
-      this.$refs['ruleForm'].resetFields()
-    }
-  },
   created() {
     this.fetchData()
   },
@@ -276,7 +265,7 @@ export default {
       })
     },
     handleEdit() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           updateItem(this.form)
@@ -325,6 +314,7 @@ export default {
       this.isEdit = true
       this.editIndex = index
       this.form = Object.assign({}, obj)
+      this.clearValidation()
       this.dialogFormVisible = true
     },
     handleSearch() {
@@ -335,9 +325,9 @@ export default {
       })
     },
     handleCreate() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.dialogFormVisible = false
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
-          this.dialogFormVisible = false
           createItem(this.form)
             .then(() => {
               this.fetchData()
@@ -359,6 +349,7 @@ export default {
     },
     openDialogForCreate() {
       this.form = {}
+      this.clearValidation()
       this.isEdit = false
       this.dialogFormVisible = true
     },
@@ -368,6 +359,11 @@ export default {
           done()
         })
         .catch(_ => {})
+    },
+    clearValidation() {
+      if (this.$refs['ruleForm'] !== undefined) {
+        this.$refs['ruleForm'].clearValidate()
+      }
     }
   }
 }

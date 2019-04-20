@@ -1,4 +1,4 @@
-import { login, logout } from '@/api/login'
+import { login, logout, getInfo, refresh } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
@@ -6,7 +6,8 @@ const user = {
     token: getToken(),
     name: '',
     avatar: '',
-    roles: []
+    roles: [],
+    expTime: 0
   },
 
   mutations: {
@@ -21,6 +22,9 @@ const user = {
     },
     SET_ROLES: (state, roles) => {
       state.roles = roles
+    },
+    SET_EXP: (state, expTime) => {
+      state.expTime = expTime
     }
   },
 
@@ -30,12 +34,15 @@ const user = {
       return new Promise((resolve, reject) => {
         login(userInfo.username, userInfo.password)
           .then(response => {
-            const data = response.data
-            setToken(data.access)
-            commit('SET_TOKEN', data.access)
-            commit('SET_NAME', data.profile.userName)
-            commit('SET_ROLE', ['123'])
-            resolve()
+            if (response.data.access === '无权访问') reject('账号或密码错误')
+            else {
+              const data = response.data
+              setToken(data.access)
+              commit('SET_EXP', data.profile.expires)
+              commit('SET_TOKEN', data.access)
+
+              resolve()
+            }
           })
           .catch(error => {
             reject(error)
@@ -43,27 +50,44 @@ const user = {
       })
     },
 
-    // // 获取用户信息
-    // GetInfo({ commit, state }) {
-    //   return new Promise((resolve, reject) => {
-    //     getInfo(state.token)
-    //       .then(response => {
-    //         const data = response
-    //         if (data.userInfo.roleNames && data.userInfo.roleNames.length > 0) {
-    //           // 验证返回的roles是否是一个非空数组
-    //           commit('SET_ROLES', data.userInfo.roleNames)
-    //         } else {
-    //           reject('getInfo: roles must be a non-null array !')
-    //         }
-    //         //  commit('SET_NAME', data.name)
-    //         //  commit('SET_AVATAR', data.avatar)
-    //         resolve(response)
-    //       })
-    //       .catch(error => {
-    //         reject(error)
-    //       })
-    //   })
-    // },
+    // 获取用户信息
+    GetInfo({ commit, state }) {
+      return new Promise((resolve, reject) => {
+        getInfo(state.token)
+          .then(response => {
+            const data = response.data
+            if (data.roleNames && data.roleNames.length > 0) {
+              // 验证返回的roles是否是一个非空数组
+              commit('SET_ROLES', data.roleNames)
+            } else {
+              reject('getInfo: roles must be a non-null array !')
+            }
+            commit('SET_NAME', data.name)
+            //  commit('SET_AVATAR', data.avatar)
+            resolve(response)
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
+    Refresh({ commit, state }) {
+      return new Promise((resolve, reject) => {
+        refresh(state.name, state.token)
+          .then(reponse => {
+            const data = reponse.data
+
+            commit('SET_TOKEN', data.access)
+            setToken(data.access)
+            commit('SET_EXP', data.profile.expires)
+
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
 
     // 登出
     LogOut({ commit, state }) {

@@ -50,20 +50,19 @@
 </template>
 
 <script>
-import { isvalidUsername } from '@/utils/validate'
 export default {
   name: 'Login',
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (!isvalidUsername(value)) {
-        callback(new Error('请输入正确的用户名'))
+      if (!value) {
+        callback(new Error('请输入用户名'))
       } else {
         callback()
       }
     }
     const validatePass = (rule, value, callback) => {
-      if (value.length < 5) {
-        callback(new Error('密码不能小于5位'))
+      if (value.length === 0) {
+        callback(new Error('密码不能为空'))
       } else {
         callback()
       }
@@ -110,8 +109,9 @@ export default {
               this.loading = false
               this.$router.push({ path: this.redirect || '/' })
             })
-            .catch(() => {
+            .catch(error => {
               this.loading = false
+              this.$message.error(error)
             })
         } else {
           console.log('error submit!!')

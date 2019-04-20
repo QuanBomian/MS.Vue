@@ -16,7 +16,7 @@ export function deleteItem(id) {
 
 export function updateItem(item) {
   return request({
-    url: '/Familys/' + item.id,
+    url: '/Familys/',
     method: 'put',
     data: item
   })

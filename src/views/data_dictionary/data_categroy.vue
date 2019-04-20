@@ -3,11 +3,14 @@
     <div style="margin-top: 15px;">
       <el-row :gutter="10" style="margin-buttom: 15px;" type="flex">
         <el-col :span="6">
-          <el-input v-model="search.userName" placeholder="用户名" clearable/>
+          <el-input v-model="search.categroyName" placeholder="请输入数据类别名称" clearable/>
+        </el-col>
+
+        <el-col :span="10">
+          <el-input v-model="search.categroyCode" placeholder="请输入数据类别编码"/>
         </el-col>
       </el-row>
-
-      <el-row :gutter="5" style="margin-top: 15px;">
+      <el-row :gutter="5" style="margin-top: 30px;">
         <el-col :span="2">
           <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         </el-col>
@@ -28,13 +31,13 @@
       fit
       highlight-current-row
     >
-      <el-table-column label="用户名" width="160" align="center">
-        <template slot-scope="scope">{{ scope.row.userName }}</template>
+      <el-table-column label="数据类别编码" align="center">
+        <template slot-scope="scope">{{ scope.row.categroyCode }}</template>
       </el-table-column>
-      <el-table-column label="密码" width="500" align="center">
-        <template slot-scope="scope">{{ scope.row.password }}</template>
+      <el-table-column label="数据类别名称" align="center">
+        <template slot-scope="scope">{{ scope.row.categroyName }}</template>
       </el-table-column>
-      <el-table-column label="操作" align="center" fixed="right" width="200">
+      <el-table-column label="操作" align="center" width="200">
         <template slot-scope="scope">
           <el-button
             size="small"
@@ -48,11 +51,11 @@
     <!-- 模态框 -->
     <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="乡镇信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
-        <el-form-item :label-width="formLabelWidth" label="用户名" prop="userName">
-          <el-input v-model="form.userName" auto-complete="off" placeholder="用户名"/>
+        <el-form-item :label-width="formLabelWidth" label="数据类别编码" prop="categroyCode">
+          <el-input v-model="form.categroyCode" auto-complete="off" placeholder="数据类别编码"/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="密码" prop="password">
-          <el-input v-model="form.password" auto-complete="off" placeholder="密码"/>
+        <el-form-item :label-width="formLabelWidth" label="数据类别名称" prop="categroyName">
+          <el-input v-model="form.categroyName" auto-complete="off" placeholder="数据类别名称"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -65,7 +68,13 @@
 </template>
 
 <script>
-import { getList, deleteItem, updateItem, createItem, query } from '@/api/user'
+import {
+  getListOfDataCategroy,
+  deleteItemOfDataCategroy,
+  updateItemOfDataCategroy,
+  createItemOfDataCategroy,
+  queryOfDataCategroy
+} from '@/api/data_categroy'
 export default {
   data() {
     return {
@@ -77,53 +86,53 @@ export default {
       isEdit: true,
       editIndex: null,
       search: {
-        username: null
+        categroyName: null,
+        categroyCode: null
       },
       form: {
-        userName: '',
-        password: '',
+        categroyName: '',
+        categroyCode: '',
         id: ''
       },
 
       rules: {
-        userName: [
-          { required: true, message: '请输入用户名', trigger: 'blur' }
+        categroyName: [
+          { required: true, message: '请输入数据类别名称', trigger: 'blur' }
         ],
 
-        password: [
+        categroyCode: [
           {
             required: true,
-            message: '请输入密码',
+            message: '请输入数据类别编码',
             trigger: 'blur'
           }
         ]
       },
-      formLabelWidth: '120px'
-    }
-  },
-  watch: {
-    dialogFormVisible: function(val, oldVla) {
-      this.$refs['ruleForm'].resetFields()
+      formLabelWidth: '150px'
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    clearValidation() {
+      if (this.$refs['ruleForm'] !== undefined) {
+        this.$refs['ruleForm'].clearValidate()
+      }
+    },
     fetchData() {
       this.listLoading = true
-      console.log('123')
-      getList().then(response => {
+      getListOfDataCategroy().then(response => {
         this.list = response.items
         this.originList = response.items
         this.listLoading = false
       })
     },
     handleEdit() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
-          updateItem(this.form)
+          updateItemOfDataCategroy(this.form)
             .then(() => {
               this.fetchData()
               this.$message({
@@ -149,7 +158,7 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          deleteItem(this.list[index].id).then(() => {
+          deleteItemOfDataCategroy(this.list[index].id).then(() => {
             this.list.splice(index, 1)
             this.$message({
               type: 'success',
@@ -169,20 +178,21 @@ export default {
       this.isEdit = true
       this.editIndex = index
       this.form = Object.assign({}, obj)
+      this.clearValidation()
       this.dialogFormVisible = true
     },
     handleSearch() {
       this.listLoading = false
-      this.list = query(this.search).then(response => {
+      queryOfDataCategroy(this.search).then(response => {
         this.list = response.list
         this.listLoading = false
       })
     },
     handleCreate() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
-          createItem(this.form)
+          createItemOfDataCategroy(this.form)
             .then(() => {
               this.fetchData()
               this.$message({
@@ -203,6 +213,7 @@ export default {
     },
     openDialogForCreate() {
       this.form = {}
+      this.clearValidation()
       this.isEdit = false
       this.dialogFormVisible = true
     },

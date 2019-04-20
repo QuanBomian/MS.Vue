@@ -3,26 +3,31 @@
     <div style="margin-top: 15px;">
       <el-row :gutter="10" style="margin-buttom: 15px;" type="flex">
         <el-col :span="6">
-          <el-input v-model="search.villageName" placeholder="所属村名" clearable/>
+          <el-input v-model="search.villageGroupCode" placeholder="请输入村民小组编码" clearable/>
         </el-col>
 
         <el-col :span="10">
-          <el-input v-model="search.officeBuildingNumber" placeholder="办公楼数量" clearable/>
+          <el-input v-model="search.principalName" placeholder="请输入负责人姓名" clearable/>
         </el-col>
         <el-col :span="8">
-          <el-input v-model="search.sportsActivityRoomNumber" placeholder="文体活动中心数量" clearable/>
+          <el-input v-model="search.principalPhone" placeholder="请输入负责人联系电话" clearable/>
         </el-col>
       </el-row>
       <el-row :gutter="8" style="margin-top: 15px;">
         <el-col :span="8">
-          <el-input v-model="search.seniorCitizenCenterNumber" placeholder="老年人活动中心数量" clearable/>
+          <el-input v-model="search.principalEmail" placeholder="请输入联系人电子邮箱" clearable/>
         </el-col>
         <el-col :span="8">
-          <el-input v-model="search.staffQuartersNumber" placeholder="员工宿舍数量" clearable/>
+          <el-input v-model="search.villageName" placeholder="请输入所属村名" clearable/>
         </el-col>
 
         <el-col :span="8">
-          <el-input v-model="search.libraryNumber" placeholder="图书馆数量" clearable/>
+          <el-input v-model="search.memberNumber" placeholder="请输入成员数量" clearable/>
+        </el-col>
+      </el-row>
+      <el-row :gutter="8" style="margin-top: 15px;">
+        <el-col :span="8">
+          <el-input v-model="search.principalAddress" placeholder="请输入负责人家庭住址" clearable/>
         </el-col>
       </el-row>
       <el-row :gutter="5" style="margin-top: 15px;">
@@ -46,43 +51,27 @@
       fit
       highlight-current-row
     >
-      <el-table-column label="所属村名" width="160" align="center">
+      <el-table-column label="村名小组编码" width="160" align="center">
+        <template slot-scope="scope">{{ scope.row.villageGroupCode }}</template>
+      </el-table-column>
+      <el-table-column label="负责人姓名" width="160" align="center">
+        <template slot-scope="scope">{{ scope.row.principalName }}</template>
+      </el-table-column>
+      <el-table-column label="负责人家庭住址" width="140" align="center">
+        <template slot-scope="scope">{{ scope.row.principalAddress }}</template>
+      </el-table-column>
+      <el-table-column label="负责人电子邮箱" width="240" align="center">
+        <template slot-scope="scope">{{ scope.row.principalEmail }}</template>
+      </el-table-column>
+      <el-table-column label="负责人联系电话" width="100" align="center">
+        <template slot-scope="scope">{{ scope.row.principalPhone }}</template>
+      </el-table-column>
+      <el-table-column label="所属村名" width="120" align="center">
         <template slot-scope="scope">{{ scope.row.villageName }}</template>
       </el-table-column>
-      <el-table-column label="办公楼数量" width="160" align="center">
-        <template slot-scope="scope">{{ scope.row.officeBuildingNumber }}</template>
+      <el-table-column label="成员数量" width="120" align="center">
+        <template slot-scope="scope">{{ scope.row.memberNumber }}</template>
       </el-table-column>
-      <el-table-column label="办公楼面积" width="140" align="center">
-        <template slot-scope="scope">{{ scope.row.officeBuildingArea }}</template>
-      </el-table-column>
-      <el-table-column label="服务站数量" width="240" align="center">
-        <template slot-scope="scope">{{ scope.row.serviceStationNumber }}</template>
-      </el-table-column>
-      <el-table-column label="老年人活动中心数量" width="100" align="center">
-        <template slot-scope="scope">{{ scope.row.seniorCitizenCenterNumber }}</template>
-      </el-table-column>
-      <el-table-column label="老年人活动中心面积" width="120" align="center">
-        <template slot-scope="scope">{{ scope.row.seniorCitizenCenterArea }}</template>
-      </el-table-column>
-      <el-table-column label="文体活动室数量" width="120" align="center">
-        <template slot-scope="scope">{{ scope.row.sportsActivityRoomNumber }}</template>
-      </el-table-column>
-      <el-table-column label="文体活动室面积" width="120" align="center">
-        <template slot-scope="scope">{{ scope.row.sportActivityRoomArea }}</template>
-      </el-table-column>
-      <el-table-column label="员工宿舍数量" width="120" align="center">
-        <template slot-scope="scope">{{ scope.row.staffQuartersNumber }}</template>
-      </el-table-column>
-      <el-table-column label="员工宿舍面积" width="120" align="center">
-        <template slot-scope="scope">{{ scope.row.staffQuarterArea }}</template>
-      </el-table-column>
-      <el-table-column label="图书馆数量" width="120" align="center">
-        <template slot-scope="scope">{{ scope.row.libraryNumber }}</template>
-      </el-table-column>
-      <el-table-column label="图书馆藏书数量" width="120" align="center">
-        <template slot-scope="scope">{{ scope.row.libaryCollectionsNumber }}</template>
-      </el-table-column>
-
       <el-table-column label="操作" align="center" fixed="right" width="200">
         <template slot-scope="scope">
           <el-button
@@ -97,65 +86,26 @@
     <!-- 模态框 -->
     <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="村信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
-        <el-form-item :label-width="formLabelWidth" label="所属村名" prop="villageName">
+        <el-form-item :label-width="formLabelWidth" label="村民小组编码" prop="villageGroupCode">
+          <el-input v-model="form.villageGroupCode" auto-complete="off" placeholder="村民小组编码"/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="负责人姓名" prop="principalName">
+          <el-input v-model="form.principalName" auto-complete="off" placeholder="负责人姓名"/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="负责人联系电话" prop="principalPhone">
+          <el-input v-model="form.principalPhone" auto-complete="off" placeholder="负责人联系电话"/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="负责人电子邮箱" prop="principalEmail">
+          <el-input v-model="form.principalEmail" auto-complete="off" placeholder="负责人电子邮箱"/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="负责人家庭住址" prop="principalAddress">
+          <el-input v-model="form.principalAddress" auto-complete="off" placeholder="负责人家庭住址"/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="所属村名 " prop="villageName">
           <el-input v-model="form.villageName" auto-complete="off" placeholder="所属村名"/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="办公楼数量" prop="officeBuildingNumber">
-          <el-input v-model="form.officeBuildingNumber" auto-complete="off" placeholder="办公楼数量"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="办公楼面积" prop="officeBuildingArea">
-          <el-input v-model="form.officeBuildingArea" auto-complete="off" placeholder="办公楼面积"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="服务站数量" prop="serviceStationNumber">
-          <el-input v-model="form.serviceStationNumber" auto-complete="off" placeholder="服务站数量"/>
-        </el-form-item>
-        <el-form-item
-          :label-width="formLabelWidth"
-          label="老年人活动中心数量"
-          prop="seniorCitizenCenterNumber"
-        >
-          <el-input
-            v-model="form.seniorCitizenCenterNumber"
-            auto-complete="off"
-            placeholder="老年人活动中心数量"
-          />
-        </el-form-item>
-        <el-form-item
-          :label-width="formLabelWidth"
-          label="老年人活动中心面积 "
-          prop="seniorCitizenCenterArea"
-        >
-          <el-input
-            v-model="form.seniorCitizenCenterArea"
-            auto-complete="off"
-            placeholder="老年人活动中心面积"
-          />
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="文体活动室数量" prop="sportsActivityRoomNumber">
-          <el-input
-            v-model="form.sportsActivityRoomNumber"
-            auto-complete="off"
-            placeholder="文体活动室数量"
-          />
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="文体活动室面积" prop="sportActivityRoomArea">
-          <el-input v-model="form.sportActivityRoomArea" auto-complete="off" placeholder="文体活动室面积"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="员工宿舍数量" prop="staffQuartersNumber">
-          <el-input v-model="form.staffQuartersNumber" auto-complete="off" placeholder="员工宿舍数量"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="员工宿舍面积" prop="staffQuarterArea">
-          <el-input v-model="form.staffQuarterArea" auto-complete="off" placeholder="员工宿舍面积"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="图书馆数量" prop="libraryNumber">
-          <el-input v-model="form.libraryNumber" auto-complete="off" placeholder="图书馆数量"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="图案书馆藏书数量" prop="libaryCollectionsNumber">
-          <el-input
-            v-model="form.libaryCollectionsNumber"
-            auto-complete="off"
-            placeholder="图案书馆藏书数量"
-          />
+        <el-form-item :label-width="formLabelWidth" label="成员数量" prop="memberNumber">
+          <el-input v-model="form.memberNumber" auto-complete="off" placeholder="成员数量"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -174,7 +124,7 @@ import {
   updateItem,
   createItem,
   query
-} from '@/api/non_operating_assets'
+} from '@/api/villager_group'
 export default {
   data() {
     var checkPhone = (rule, value, callback) => {
@@ -199,34 +149,20 @@ export default {
       isEdit: true,
       editIndex: null,
       search: {
-        villageName: '',
-        officeBuildingNumber: null,
-        // officeBuildingArea: null,
-        serviceStationNumber: null,
-        // serviceStationArea: null,
-        SeniorCitizenCenterNumber: null,
-        // SeniorCitizenCenterArea: null,
-        SportsActivityRoomNumber: null,
-        // SportActivityRoomArea: null,
-        StaffQuartersNumber: null,
-        // StaffQuarterArea: null,
-        LibraryNumber: null
-        // LibaryCollectionsNumber: null
+        villageGroupCode: null,
+        principalPhone: null,
+        principalEmail: null,
+        principalName: null,
+        villageName: null,
+        memberNumber: null
       },
       form: {
+        villageGroupCode: '',
+        principalPhone: '',
+        principalEmail: '',
+        principalName: '',
         villageName: '',
-        officeBuildingNumber: 0,
-        officeBuildingArea: 0,
-        serviceStationNumber: 0,
-        serviceStationArea: 0,
-        seniorCitizenCenterNumber: 0,
-        seniorCitizenCenterArea: 0,
-        sportsActivityRoomNumber: 0,
-        sportActivityRoomArea: 0,
-        staffQuartersNumber: 0,
-        staffQuarterArea: 0,
-        libraryNumber: 0,
-        libaryCollectionsNumber: 0,
+        memberNumber: null,
         id: ''
       },
 
@@ -301,7 +237,7 @@ export default {
           }
         ]
       },
-      formLabelWidth: '160px'
+      formLabelWidth: '120px'
     }
   },
   created() {
@@ -376,7 +312,7 @@ export default {
     },
     handleSearch() {
       this.listLoading = false
-      query(this.search).then(response => {
+      this.list = query(this.search).then(response => {
         this.list = response.list
         this.listLoading = false
       })

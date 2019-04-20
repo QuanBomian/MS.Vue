@@ -52,13 +52,6 @@ export const constantRouterMap = [
     meta: { title: '档案管理', icon: 'example' },
     children: [
       {
-        path: 'villagerTable',
-        name: 'VillagerTable',
-        component: () => import('@/views/vliiager_table/index'),
-        meta: { title: '村民信息', icon: 'table' }
-      },
-
-      {
         path: 'townTable',
         name: 'TownTable',
         component: () => import('@/views/town_table/index'),
@@ -70,11 +63,25 @@ export const constantRouterMap = [
         component: () => import('@/views/village_table/index'),
         meta: { title: '村信息', icon: 'table' }
       },
+
       {
-        path: 'departmentTable',
-        name: 'DepartmentTable',
-        component: () => import('@/views/department_table/index'),
-        meta: { title: '组织机构信息', icon: 'table' }
+        path: 'villagerGroupTable',
+        name: 'VillagerGroupTable',
+        component: () => import('@/views/villager_group_table/index'),
+        meta: { title: '村民小组信息', icon: 'table' }
+      },
+      {
+        path: 'nonOperatingAssetsTable',
+        name: 'NonOperatingAssetsTable',
+        component: () => import('@/views/non_operating_assets_table/index'),
+        meta: { title: '非经营性资产信息', icon: 'table' }
+      },
+
+      {
+        path: 'villagerTable',
+        name: 'VillagerTable',
+        component: () => import('@/views/villager_table/index'),
+        meta: { title: '村民信息', icon: 'table' }
       },
       {
         path: 'familyTable',
@@ -82,23 +89,25 @@ export const constantRouterMap = [
         component: () => import('@/views/family_table/index'),
         meta: { title: '家庭信息', icon: 'table' }
       },
+
+      {
+        path: 'departmentTable',
+        name: 'DepartmentTable',
+        component: () => import('@/views/department_table/index'),
+        meta: { title: '组织机构信息', icon: 'table' }
+      },
       {
         path: 'memberTable',
         name: 'MemberTable',
         component: () => import('@/views/member_table/index'),
         meta: { title: '人员信息', icon: 'table' }
       },
+
       {
         path: 'partyMemberTable',
         name: 'PartyMemberTable',
         component: () => import('@/views/party_member_table/index'),
         meta: { title: '党员信息', icon: 'table' }
-      },
-      {
-        path: 'nonOperatingAssetsTable',
-        name: 'NonOperatingAssetsTable',
-        component: () => import('@/views/non_operating_assets_table/index'),
-        meta: { title: '非经营性资产信息', icon: 'table' }
       }
     ]
   },
@@ -119,7 +128,22 @@ export const constantRouterMap = [
         path: 'dataDictionary',
         name: 'DataDictionary',
         component: () => import('@/views/data_dictionary/index'),
-        meta: { title: '数据字典管理', icon: 'form' }
+        redirect: '/basic/dataDictionary/dataCategroy',
+        meta: { title: '数据字典管理', icon: 'form' },
+        children: [
+          {
+            path: 'dataCategroy',
+            name: 'DataCategroy',
+            component: () => import('@/views/data_dictionary/data_categroy'),
+            meta: { title: '数据类别管理', icon: 'form' }
+          },
+          {
+            path: 'dataItem',
+            name: 'DataItem',
+            component: () => import('@/views/data_dictionary/data_item'),
+            meta: { title: '数据项管理', icon: 'form' }
+          }
+        ]
       }
     ]
   },
@@ -134,19 +158,13 @@ export const constantRouterMap = [
         path: 'userInfo',
         name: 'UserInfo',
         component: () => import('@/views/userinfo/index'),
-        meta: { title: '信息管理', icon: '用户' },
+        meta: { title: '账号管理', icon: '用户' },
         children: [
           {
             path: 'password',
-            component: () => import('@/views/userinfo/password/index'),
+            component: () => import('@/views/userinfo/password'),
             name: 'Password',
             meta: { title: '修改密码', icon: '密码' }
-          },
-          {
-            path: 'basicInfo',
-            component: () => import('@/views/userinfo/basic_info/index'),
-            name: 'BasicInfo',
-            meta: { title: '基本信息', icon: 'example' }
           }
         ]
       },
@@ -170,74 +188,13 @@ export const constantRouterMap = [
       }
     ]
   },
-
-  {
-    path: '/nested',
-    component: Layout,
-    redirect: '/nested/menu1',
-    name: 'Nested',
-    meta: {
-      title: 'Nested',
-      icon: 'nested'
-    },
-    children: [
-      {
-        path: 'menu1',
-        component: () => import('@/views/nested/menu1/index'), // Parent router-view
-        name: 'Menu1',
-        meta: { title: 'Menu1' },
-        children: [
-          {
-            path: 'menu1-1',
-            component: () => import('@/views/nested/menu1/menu1-1'),
-            name: 'Menu1-1',
-            meta: { title: 'Menu1-1' }
-          },
-          {
-            path: 'menu1-2',
-            component: () => import('@/views/nested/menu1/menu1-2'),
-            name: 'Menu1-2',
-            meta: { title: 'Menu1-2' },
-            children: [
-              {
-                path: 'menu1-2-1',
-                component: () =>
-                  import('@/views/nested/menu1/menu1-2/menu1-2-1'),
-                name: 'Menu1-2-1',
-                meta: { title: 'Menu1-2-1' }
-              },
-              {
-                path: 'menu1-2-2',
-                component: () =>
-                  import('@/views/nested/menu1/menu1-2/menu1-2-2'),
-                name: 'Menu1-2-2',
-                meta: { title: 'Menu1-2-2' }
-              }
-            ]
-          },
-          {
-            path: 'menu1-3',
-            component: () => import('@/views/nested/menu1/menu1-3'),
-            name: 'Menu1-3',
-            meta: { title: 'Menu1-3' }
-          }
-        ]
-      },
-      {
-        path: 'menu2',
-        component: () => import('@/views/nested/menu2/index'),
-        meta: { title: 'menu2' }
-      }
-    ]
-  },
-
   {
     path: 'external-link',
     component: Layout,
     children: [
       {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
+        path: 'http://localhost:5543/swagger/index.html',
+        meta: { title: 'API文档', icon: 'link' }
       }
     ]
   },

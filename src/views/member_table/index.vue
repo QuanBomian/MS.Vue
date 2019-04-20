@@ -3,29 +3,135 @@
     <div style="margin-top: 15px;">
       <el-row :gutter="10" style="margin-buttom: 15px;" type="flex">
         <el-col :span="6">
-          <el-input v-model="search.familyCode" placeholder="请输入家庭代码" clearable/>
+          <el-input v-model="search.memberCode" placeholder="人员代码" clearable/>
         </el-col>
 
         <el-col :span="10">
-          <el-input v-model="search.householder" placeholder="请输入户主"/>
+          <el-input v-model="search.memberName" placeholder="请输入人员姓名"/>
         </el-col>
         <el-col :span="8">
-          <el-input v-model="search.peopleNumber" placeholder="请输入人口"/>
+          <el-input v-model="search.departmentCode" placeholder="请输入部门代码"/>
         </el-col>
       </el-row>
       <el-row :gutter="8" style="margin-top: 15px;">
-        <el-col :span="8">
-          <el-input v-model="search.accountCharacter" placeholder="请输入户口类型"/>
+        <el-col>
+          <el-input v-model="search.homeAddress" placeholder="请输入家庭住址"/>
+        </el-col>
+      </el-row>
+      <el-row :gutter="8" style="margin-top: 15px;">
+        <el-col :span="6">
+          <el-radio-group v-model="search.gender">
+            <el-radio label="男" @click.native.prevent="clickitemGender('男')">男</el-radio>
+            <el-radio label="女" @click.native.prevent="clickitemGender('女')">女</el-radio>
+          </el-radio-group>
         </el-col>
         <el-col :span="8">
-          <el-input v-model="search.villageName" placeholder="请输入所属村名" clearable/>
+          <el-input v-model="search.nationality" placeholder="民族" clearable/>
         </el-col>
 
         <el-col :span="8">
-          <el-input v-model="search.villageGroupCode" placeholder="请输入所属村民小组代码" clearable/>
+          <el-input v-model="search.idCardNumber" placeholder="身份证号" clearable/>
         </el-col>
       </el-row>
-      <el-row :gutter="8" style="margin-top: 15px;"/>
+      <el-row :gutter="8" style="margin-top: 15px;">
+        <el-col :span="6">
+          <el-date-picker
+            v-model="search.birthdayFrom"
+            :picker-options="pickerOptions"
+            type="date"
+            placeholder="选择开始出生日期"
+          />
+        </el-col>
+        <el-col :span="6">
+          <el-date-picker
+            v-model="search.birthdayTo"
+            :picker-options="pickerOptions"
+            type="date"
+            placeholder="选择结束出生日期"
+          />
+        </el-col>
+        <el-col :span="8">
+          <el-select v-model="search.education" clearable placeholder="请选择文化水平">
+            <el-option
+              v-for="item in educationOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+      </el-row>
+      <el-row :gutter="8" style="margin-top: 15px;">
+        <el-col :span="6">
+          <el-select v-model="search.maritalStatus" placeholder="请选择婚姻状况" clearable>
+            <el-option
+              v-for="item in maritalOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+        <el-col :span="6">
+          <el-select v-model="search.politicalStatus" placeholder="请选择政治面貌" clearable>
+            <el-option
+              v-for="item in politicalStatusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+        <el-col :span="8">
+          <el-select v-model="search.status" placeholder="请选择工作状态" clearable>
+            <el-option
+              v-for="item in workingOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+      </el-row>
+      <el-row :gutter="8" style="margin-top: 15px;">
+        <el-col :span="6">
+          <el-date-picker
+            v-model="search.entryTimeFrom"
+            :picker-options="pickerOptions"
+            type="date"
+            placeholder="选择开始入职日期"
+          />
+        </el-col>
+        <el-col :span="6">
+          <el-date-picker
+            v-model="search.entryTimeTo"
+            :picker-options="pickerOptions"
+            type="date"
+            placeholder="选择结束入职日期"
+          />
+        </el-col>
+      </el-row>
+      <el-row :gutter="8" style="margin-top: 15px;">
+        <el-col :span="6">
+          <el-date-picker
+            v-model="search.leaveTimeFrom"
+            :picker-options="pickerOptions"
+            type="date"
+            placeholder="选择开始离职日期"
+          />
+        </el-col>
+        <el-col :span="6">
+          <el-date-picker
+            v-model="search.leaveTimeTo"
+            :picker-options="pickerOptions"
+            type="date"
+            placeholder="选择结束离职日期"
+          />
+        </el-col>
+        <el-col :span="8">
+          <el-input v-model="search.lengthOfService" placeholder="服务时间" clearable/>
+        </el-col>
+      </el-row>
       <el-row :gutter="5" style="margin-top: 15px;">
         <el-col :span="2">
           <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
@@ -47,9 +153,6 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="ID" width="80">
-        <template slot-scope="scope">{{ scope.$index }}</template>
-      </el-table-column>
       <el-table-column label="人员代码" width="200" align="center">
         <template slot-scope="scope">{{ scope.row.memberCode }}</template>
       </el-table-column>
@@ -65,6 +168,9 @@
       <el-table-column label="民族" width="150" align="center">
         <template slot-scope="scope">{{ scope.row.nationality }}</template>
       </el-table-column>
+      <el-table-column label="家庭住址" width="200" align="center">
+        <template slot-scope="scope">{{ scope.row.homeAddress }}</template>
+      </el-table-column>
       <el-table-column label="身份证号码" width="150" align="center">
         <template slot-scope="scope">{{ scope.row.idCardNumber }}</template>
       </el-table-column>
@@ -72,7 +178,7 @@
         <template slot-scope="scope">{{ scope.row.position }}</template>
       </el-table-column>
       <el-table-column label="出生日期" width="220" align="center">
-        <template slot-scope="scope">{{ scope.row.housingArea|dateString }}</template>
+        <template slot-scope="scope">{{ scope.row.birthday|dateString }}</template>
       </el-table-column>
       <el-table-column label="文化水平" width="220" align="center">
         <template slot-scope="scope">{{ scope.row.education }}</template>
@@ -107,46 +213,108 @@
       </el-table-column>
     </el-table>
     <!-- 模态框 -->
-    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="乡镇信息">
+    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="人员信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
-        <el-form-item :label-width="formLabelWidth" label="家庭代码" prop="familyCode">
-          <el-input v-model="form.familyCode" auto-complete="off" placeholder="家庭代码"/>
+        <el-form-item :label-width="formLabelWidth" label="人员代码" prop="memberCode">
+          <el-input v-model="form.memberCode" auto-complete="off" placeholder="人员代码" clearable/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="户主" prop="householder">
-          <el-input v-model="form.householder" auto-complete="off" placeholder="户主"/>
+        <el-form-item :label-width="formLabelWidth" label="人员姓名" prop="memberName">
+          <el-input v-model="form.memberName" auto-complete="off" placeholder="人员姓名" clearable/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="人口" prop="peopleNumber">
-          <el-input v-model="form.peopleNumber" auto-complete="off" placeholder="人口"/>
+        <el-form-item :label-width="formLabelWidth" label="部门代码" prop="departmentCode">
+          <el-input v-model="form.departmentCode" auto-complete="off" placeholder="部门代码" clearable/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="户口类型" prop="accountCharacter">
-          <el-input v-model="form.accountCharacter" auto-complete="off" placeholder="户口类型"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="所属村名" prop="villageName">
-          <el-input v-model="form.villageName" auto-complete="off" placeholder="所属村名"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="所属村民小组代码" prop="villageGroupCode">
-          <el-input v-model="form.villageGroupCode" auto-complete="off" placeholder="所属村民小组代码"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="人均年收入" prop="averageAnnualIncome">
-          <el-input v-model="form.averageAnnualIncome" auto-complete="off" placeholder="人均年收入"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="房屋面积" prop="housingArea">
-          <el-input v-model="form.housingArea" auto-complete="off" placeholder="房屋面积"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="面积" prop="averageHousingArea">
-          <el-input v-model="form.averageHousingArea" auto-complete="off" placeholder="人均面积"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="是否低保户" prop="isLowIncome">
-          <el-radio-group v-model="form.isLowIncome">
-            <el-radio :label="true">是</el-radio>
-            <el-radio :label="false">否</el-radio>
+        <el-form-item :label-width="formLabelWidth" label="性别" prop="gender">
+          <el-radio-group v-model="form.gender">
+            <el-radio label="男">男</el-radio>
+            <el-radio label="女">女</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="是否贫困户" prop="isPoor">
-          <el-radio-group v-model="form.isPoor">
-            <el-radio :label="true">是</el-radio>
-            <el-radio :label="false">否</el-radio>
-          </el-radio-group>
+        <el-form-item :label-width="formLabelWidth" label="民族" prop="nationality">
+          <el-input v-model="form.nationality" auto-complete="off" placeholder="民族" clearable/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="家庭住址" prop="homeAddress">
+          <el-input v-model="form.homeAddress" auto-complete="off" placeholder="家庭住址" clearable/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="身份证号" prop="idCardNumber">
+          <el-input v-model="form.idCardNumber" auto-complete="off" placeholder="身份证号" clearable/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="职务" prop="position">
+          <el-input v-model="form.position" auto-complete="off" placeholder="职务" clearable/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="出生日期" prop="birthday">
+          <el-date-picker
+            v-model="form.birthday"
+            :picker-options="pickerOptions"
+            :clearable="false"
+            type="date"
+            placeholder="输入生日"
+          />
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="文化水平" prop="education">
+          <el-select v-model="form.education" placeholder="请选择文化水平状况">
+            <el-option
+              v-for="item in educationOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="婚姻状况" prop="maritalStatus">
+          <el-select v-model="form.maritalStatus" placeholder="请选择婚姻状况">
+            <el-option
+              v-for="item in maritalOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="政治面貌" prop="politicalStatus">
+          <el-select v-model="form.politicalStatus" placeholder="请选择政治面貌">
+            <el-option
+              v-for="item in politicalStatusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="工作状态" prop="status">
+          <el-select v-model="form.status" placeholder="请选择工作状态">
+            <el-option
+              v-for="item in workingOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="入职时间" prop="entryTime">
+          <el-date-picker
+            v-model="form.entryTime"
+            :picker-options="pickerOptions"
+            :clearable="false"
+            type="date"
+            placeholder="选择入职日期"
+          />
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="离职时间" prop="leaveTime">
+          <el-date-picker
+            v-model="form.leaveTime"
+            :picker-options="pickerOptions"
+            type="date"
+            placeholder="选择离职日期"
+          />
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="服务时间" prop="lengthOfService">
+          <el-input
+            v-model="form.lengthOfService"
+            auto-complete="off"
+            placeholder="服务时间"
+            clearable
+          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -177,6 +345,46 @@ export default {
     }
   },
   data() {
+    function IdentityCodeValid(idcode) {
+      var weight_factor = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
+
+      var check_code = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2']
+
+      var code = idcode + ''
+      var last = idcode[17]
+
+      var seventeen = code.substring(0, 17)
+
+      // ISO 7064:1983.MOD 11-2
+      // 判断最后一位校验码是否正确
+      var arr = seventeen.split('')
+      var len = arr.length
+      var num = 0
+      for (var i = 0; i < len; i++) {
+        num = num + arr[i] * weight_factor[i]
+      }
+
+      var resisue = num % 11
+      var last_no = check_code[resisue]
+      var idcard_patter = /^[1-9][0-9]{5}([1][9][0-9]{2}|[2][0][0|1][0-9])([0][1-9]|[1][0|1|2])([0][1-9]|[1|2][0-9]|[3][0|1])[0-9]{3}([0-9]|[X])$/
+
+      var format = idcard_patter.test(idcode)
+
+      return !!(last === last_no && format)
+    }
+    var checkId = (rule, value, callback) => {
+      if (!value) {
+        callback('请输入身份证号码')
+      } else {
+        setTimeout(() => {
+          if (IdentityCodeValid(value)) {
+            callback()
+          } else {
+            callback('身份证号码不正确')
+          }
+        })
+      }
+    }
     return {
       originList: null,
       list: null,
@@ -194,15 +402,37 @@ export default {
         nationality: null,
         idCardNumber: null,
         position: null,
-        birthday: null,
+        birthdayFrom: null,
+        birthdayTo: null,
         education: null,
         maritalStatus: null,
         politicalStatus: null,
         personnelNature: null,
         status: null,
+        entryTimeFrom: null,
+        entryTimeTo: null,
+        leaveTimeFrom: null,
+        leaveTimeTo: null,
+        lengthOfService: null
+      },
+      originForm: {
+        memberCode: '',
+        memberName: '',
+        departmentCode: '',
+        homeAddress: '',
+        gender: '男',
+        nationality: '汉族',
+        idCardNumber: '',
+        position: '',
+        birthday: new Date(1970, 1, 1),
+        education: '本科',
+        maritalStatus: '未婚',
+        politicalStatus: '群众',
+        personnelNature: '',
+        status: '在职在岗',
         entryTime: null,
         leaveTime: null,
-        lengthOfService: null
+        lengthOfService: ''
       },
       form: {
         memberCode: '',
@@ -224,22 +454,56 @@ export default {
         lengthOfService: '',
         id: ''
       },
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() > Date.now()
+        }
+      },
 
       rules: {
-        departmentName: [
-          { required: true, message: '请输入部门名', trigger: 'blur' }
+        memberCode: [
+          { required: true, message: '请输入人员编码', trigger: 'blur' }
+        ],
+        memberName: [
+          { required: true, message: '请输入人员姓名', trigger: 'blur' }
         ],
         departmentCode: [
-          { required: true, message: '请输入部门代码', trigger: 'blur' }
+          { required: true, message: '请输入部门编码', trigger: 'blur' }
         ],
-        fax: [{ required: true, message: '请输入传真号', trigger: 'blur' }],
-        contactPhone: [
-          { required: true, message: '请输入联系电话', trigger: 'blur' }
+        homeAddress: [
+          {
+            required: true,
+            max: 100,
+            message: '请输入家庭住址',
+            trigger: 'blur'
+          }
         ],
-        principalName: [
-          { required: true, message: '请输入负责人姓名', trigger: 'blur' }
+        idCardNumber: [
+          { required: true, message: '请输入身份证号', trigger: 'blur' },
+          { validator: checkId, trigger: 'blur' }
+        ],
+        nationality: [
+          {
+            required: true,
+            message: '请输入民族',
+            trigger: 'blur'
+          }
         ],
 
+        position: [
+          {
+            required: true,
+            message: '请输入职位',
+            trigger: 'blur'
+          }
+        ],
+        lengthOfService: [
+          {
+            required: true,
+            message: '请输入服务时间',
+            trigger: 'blur'
+          }
+        ],
         address: [
           {
             required: true,
@@ -248,18 +512,107 @@ export default {
           }
         ]
       },
-      formLabelWidth: '120px'
-    }
-  },
-  watch: {
-    dialogFormVisible: function(val, oldVla) {
-      this.$refs['ruleForm'].resetFields()
+      formLabelWidth: '120px',
+      educationOptions: [
+        {
+          value: '小学',
+          label: '小学'
+        },
+        {
+          value: '初中',
+          label: '初中'
+        },
+        {
+          value: '高中',
+          label: '高中'
+        },
+        {
+          value: '中专',
+          label: '中专'
+        },
+        {
+          value: '本科',
+          label: '本科'
+        },
+        {
+          value: '大专专科',
+          label: '大学专科'
+        },
+        {
+          value: '硕士研究生',
+          label: '硕士研究生'
+        },
+        {
+          value: '博士研究生',
+          label: '博士研究生'
+        }
+      ],
+      maritalOptions: [
+        {
+          value: '未婚',
+          label: '未婚'
+        },
+        {
+          value: '已婚',
+          label: '已婚'
+        },
+        {
+          value: '丧偶',
+          label: '丧偶'
+        },
+        {
+          value: '离婚',
+          label: '离婚'
+        }
+      ],
+      workingOptions: [
+        {
+          value: '在职在岗',
+          label: '在职在岗'
+        },
+        {
+          value: '在职离岗',
+          label: '在职离岗'
+        },
+        {
+          value: '离职离岗',
+          label: '离职离岗'
+        }
+      ],
+      politicalStatusOptions: [
+        { value: '中共党员', label: '中共党员' },
+        { value: '中共预备党员', label: '中共预备党员' },
+        { value: '共青团员', label: '共青团员' },
+        { value: '民革党员', label: '民革党员' },
+        { value: '民盟盟员', label: '民盟盟员' },
+        { value: '民建会员', label: '民建会员' },
+        { value: '民进会员', label: '民进会员' },
+        { value: '农工党党员', label: '农工党党员' },
+        { value: '九三学社社员', label: '九三学社社员' },
+        { value: '台盟盟员', label: '台盟盟员' },
+        { value: '无党派人士', label: '无党派人士' },
+        { value: '群众', label: '群众' }
+      ]
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    setToDefault() {
+      this.form = Object.assign({}, this.from, this.originForm)
+    },
+    clearValidation() {
+      if (this.$refs['ruleForm'] !== undefined) {
+        this.$refs['ruleForm'].clearValidate()
+      }
+    },
+    clickitemGender(e) {
+      e === this.search.gender
+        ? (this.search.gender = null)
+        : (this.search.gender = e)
+    },
+
     fetchData() {
       this.listLoading = true
       getList().then(response => {
@@ -269,7 +622,7 @@ export default {
       })
     },
     handleEdit() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           updateItem(this.form)
@@ -318,6 +671,7 @@ export default {
       this.isEdit = true
       this.editIndex = index
       this.form = Object.assign({}, obj)
+      this.clearValidation()
       this.dialogFormVisible = true
     },
     handleSearch() {
@@ -328,7 +682,7 @@ export default {
       })
     },
     handleCreate() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           createItem(this.form)
@@ -351,7 +705,8 @@ export default {
       })
     },
     openDialogForCreate() {
-      this.form = {}
+      this.setToDefault()
+      this.clearValidation()
       this.isEdit = false
       this.dialogFormVisible = true
     },

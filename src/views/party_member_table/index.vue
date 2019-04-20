@@ -3,29 +3,76 @@
     <div style="margin-top: 15px;">
       <el-row :gutter="10" style="margin-buttom: 15px;" type="flex">
         <el-col :span="6">
-          <el-input v-model="search.familyCode" placeholder="请输入家庭代码" clearable/>
+          <el-input v-model="search.partyMemberCode" placeholder="党员代码" clearable/>
         </el-col>
 
         <el-col :span="10">
-          <el-input v-model="search.householder" placeholder="请输入户主"/>
+          <el-input v-model="search.departmentCode" placeholder="部门代码" clearable/>
         </el-col>
         <el-col :span="8">
-          <el-input v-model="search.peopleNumber" placeholder="请输入人口"/>
+          <el-input v-model="search.partyMemberName" placeholder="姓名" clearable/>
         </el-col>
       </el-row>
       <el-row :gutter="8" style="margin-top: 15px;">
         <el-col :span="8">
-          <el-input v-model="search.accountCharacter" placeholder="请输入户口类型"/>
-        </el-col>
-        <el-col :span="8">
-          <el-input v-model="search.villageName" placeholder="请输入所属村名" clearable/>
+          <el-input v-model="search.nationality" placeholder="民族" clearable/>
         </el-col>
 
         <el-col :span="8">
-          <el-input v-model="search.villageGroupCode" placeholder="请输入所属村民小组代码" clearable/>
+          <el-select v-model="search.education" placeholder="请选择文化水平状况" clearable>
+            <el-option
+              v-for="item in educationOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+        <el-col :span="8">
+          <el-input v-model="search.partyPosition" placeholder="党内职务" clearable/>
         </el-col>
       </el-row>
-      <el-row :gutter="8" style="margin-top: 15px;"/>
+      <el-row :gutter="8" style="margin-top: 15px;">
+        <el-col :span="8">
+          <el-date-picker
+            v-model="search.birthdayFrom"
+            :picker-options="pickerOptions"
+            clearable
+            type="date"
+            placeholder="开始出生日期"
+          />
+        </el-col>
+        <el-col :span="8">
+          <el-date-picker
+            v-model="search.birthdayTo"
+            :picker-options="pickerOptions"
+            clearable
+            type="date"
+            placeholder="结束出生日期"
+          />
+        </el-col>
+
+        <el-col :span="8">
+          <el-input v-model="search.partyOrganizationName" placeholder="党组织" clearable/>
+        </el-col>
+      </el-row>
+      <el-row :gutter="8" style="margin-top: 15px;">
+        <el-col :span="8">
+          <el-input v-model="search.contactPhone" placeholder="联系电话" clearable/>
+        </el-col>
+        <el-col :span="8">
+          <el-radio-group v-model="search.gender">
+            <el-radio label="男" @click.native.prevent="clickitemGender('男')">男</el-radio>
+            <el-radio label="女" @click.native.prevent="clickitemGender('女')">女</el-radio>
+          </el-radio-group>
+        </el-col>
+        <el-col :span="8">
+          <el-radio-group v-model="search.isFullMember">
+            <el-radio :label="true" @click.native.prevent="clickitem(true)">是</el-radio>
+            <el-radio :label="false" @click.native.prevent="clickitem(false)">否</el-radio>
+          </el-radio-group>
+        </el-col>
+      </el-row>
       <el-row :gutter="5" style="margin-top: 15px;">
         <el-col :span="2">
           <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
@@ -48,7 +95,7 @@
       highlight-current-row
     >
       <el-table-column label="党员代码" width="200" align="center">
-        <template slot-scope="scope">{{ scope.row.memberCode }}</template>
+        <template slot-scope="scope">{{ scope.row.partyMemberCode }}</template>
       </el-table-column>
       <el-table-column label="姓名" width="80" align="center">
         <template slot-scope="scope">{{ scope.row.partyMemberName }}</template>
@@ -96,45 +143,62 @@
       </el-table-column>
     </el-table>
     <!-- 模态框 -->
-    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="乡镇信息">
+    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="党员信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
-        <el-form-item :label-width="formLabelWidth" label="家庭代码" prop="familyCode">
-          <el-input v-model="form.familyCode" auto-complete="off" placeholder="家庭代码"/>
+        <el-form-item :label-width="formLabelWidth" label="党员编码" prop="partyMemberCode">
+          <el-input v-model="form.partyMemberCode" auto-complete="off" placeholder="党员编码"/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="户主" prop="householder">
-          <el-input v-model="form.householder" auto-complete="off" placeholder="户主"/>
+        <el-form-item :label-width="formLabelWidth" label="党员姓名" prop="partyMemberName">
+          <el-input v-model="form.partyMemberName" auto-complete="off" placeholder="党员姓名"/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="人口" prop="peopleNumber">
-          <el-input v-model="form.peopleNumber" auto-complete="off" placeholder="人口"/>
+        <el-form-item :label-width="formLabelWidth" label="部门编码" prop="departmentCode">
+          <el-input v-model="form.departmentCode" auto-complete="off" placeholder="部门编码"/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="户口类型" prop="accountCharacter">
-          <el-input v-model="form.accountCharacter" auto-complete="off" placeholder="户口类型"/>
+        <el-form-item :label-width="formLabelWidth" label="性别" prop="gender">
+          <el-radio-group v-model="form.gender">
+            <el-radio label="男">男</el-radio>
+            <el-radio label="女">女</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="民族" prop="nationality">
+          <el-input v-model="form.nationality" auto-complete="off" placeholder="民族"/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="文化水平" prop="education">
+          <el-select v-model="form.education" placeholder="请选择文化水平状况">
+            <el-option
+              v-for="item in educationOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="党内职务" prop="partyPosition">
+          <el-input v-model="form.partyPosition" auto-complete="off" placeholder="党内职务"/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="出生日期" prop="birthday">
+          <el-date-picker
+            v-model="form.birthday"
+            :picker-options="pickerOptions"
+            :clearable="false"
+            type="date"
+            placeholder="生日"
+          />
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="党组织" prop="partyOrganizationName">
+          <el-input v-model="form.partyOrganizationName" auto-complete="off" placeholder="党组织"/>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="联系电话" prop="contactPhone">
+          <el-input v-model="form.contactPhone" auto-complete="off" placeholder="联系电话"/>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="所属村名" prop="villageName">
           <el-input v-model="form.villageName" auto-complete="off" placeholder="所属村名"/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="所属村民小组代码" prop="villageGroupCode">
-          <el-input v-model="form.villageGroupCode" auto-complete="off" placeholder="所属村民小组代码"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="人均年收入" prop="averageAnnualIncome">
-          <el-input v-model="form.averageAnnualIncome" auto-complete="off" placeholder="人均年收入"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="房屋面积" prop="housingArea">
-          <el-input v-model="form.housingArea" auto-complete="off" placeholder="房屋面积"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="面积" prop="averageHousingArea">
-          <el-input v-model="form.averageHousingArea" auto-complete="off" placeholder="人均面积"/>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="是否低保户" prop="isLowIncome">
-          <el-radio-group v-model="form.isLowIncome">
-            <el-radio :label="true">是</el-radio>
-            <el-radio :label="false">否</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="是否贫困户" prop="isPoor">
-          <el-radio-group v-model="form.isPoor">
-            <el-radio :label="true">是</el-radio>
-            <el-radio :label="false">否</el-radio>
+
+        <el-form-item :label-width="formLabelWidth" label="是否正式党员" prop="isFullMember">
+          <el-radio-group v-model="form.isFullMember">
+            <el-radio :label="true">正式党员</el-radio>
+            <el-radio :label="false">预备党员</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -175,7 +239,7 @@ export default {
       isEdit: true,
       editIndex: null,
       search: {
-        memberCode: null,
+        partyMemberCode: null,
         partymemberName: null,
         villageName: null,
         partyOrganizationName: null,
@@ -183,62 +247,136 @@ export default {
         gender: null,
         nationality: null,
         partyPosition: null,
-        birthday: null,
+        birthdayFrom: null,
+        birthdayTo: null,
         education: null,
         contactPhone: null,
         isFullMember: null
       },
-      form: {
-        memberCode: '',
+      originForm: {
+        partyMemberCode: '',
         partymemberName: '',
         villageName: '',
-        partyOrganization: '',
+        partyOrganizationName: '',
+        departmentCode: '',
+        gender: '男',
+        nationality: '',
+        partyPosition: '',
+        birthday: new Date(1970, 1, 1),
+        education: '本科',
+        contactPhone: '',
+        isFullMember: true
+      },
+      form: {
+        partyMemberCode: '',
+        partymemberName: '',
+        villageName: '',
+        partyOrganizationName: '',
         departmentCode: '',
         gender: '',
         nationality: '',
-        partyPositionName: '',
+        partyPosition: '',
         birthday: '',
         education: '',
         contactPhone: '',
         isFullMember: null,
         id: ''
       },
+      educationOptions: [
+        {
+          value: '小学',
+          label: '小学'
+        },
+        {
+          value: '初中',
+          label: '初中'
+        },
+        {
+          value: '高中',
+          label: '高中'
+        },
+        {
+          value: '中专',
+          label: '中专'
+        },
+        {
+          value: '本科',
+          label: '本科'
+        },
+        {
+          value: '大专专科',
+          label: '大学专科'
+        },
+        {
+          value: '硕士研究生',
+          label: '硕士研究生'
+        },
+        {
+          value: '博士研究生',
+          label: '博士研究生'
+        }
+      ],
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() > Date.now()
+        }
+      },
 
       rules: {
-        departmentName: [
-          { required: true, message: '请输入部门名', trigger: 'blur' }
+        partyMemberCode: [
+          { required: true, message: '请输入党员编码', trigger: 'blur' }
+        ],
+        partymemberName: [
+          {
+            required: true,
+            message: '请输入党员姓名',
+            trigger: 'blur'
+          }
+        ],
+        partyOrganizationName: [
+          { required: true, message: '请输入党组织名', trigger: 'blur' }
         ],
         departmentCode: [
           { required: true, message: '请输入部门代码', trigger: 'blur' }
         ],
-        fax: [{ required: true, message: '请输入传真号', trigger: 'blur' }],
+        nationality: [
+          { required: true, message: '请输入民族', trigger: 'blur' }
+        ],
+        partyPosition: [
+          { required: true, message: '请输入党内职务', trigger: 'blur' }
+        ],
         contactPhone: [
           { required: true, message: '请输入联系电话', trigger: 'blur' }
         ],
-        principalName: [
-          { required: true, message: '请输入负责人姓名', trigger: 'blur' }
-        ],
-
-        address: [
-          {
-            required: true,
-            message: '请输入地址',
-            trigger: 'blur'
-          }
+        villageName: [
+          { required: true, message: '请输入所属村名', trigger: 'blur' }
         ]
       },
       formLabelWidth: '120px'
-    }
-  },
-  watch: {
-    dialogFormVisible: function(val, oldVla) {
-      this.$refs['ruleForm'].resetFields()
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    clickitem(e) {
+      e === this.search.isFullMember
+        ? (this.search.isFullMember = null)
+        : (this.search.isFullMember = e)
+    },
+    clearValidation() {
+      if (this.$refs['ruleForm'] !== undefined) {
+        this.$refs['ruleForm'].clearValidate()
+      }
+    },
+    setToDefault() {
+      this.form = Object.assign({}, this.from, this.originForm)
+    },
+    clickitemGender(e) {
+      e === this.search.gender
+        ? (this.search.gender = null)
+        : (this.search.gender = e)
+    },
     fetchData() {
       this.listLoading = true
       getList().then(response => {
@@ -248,7 +386,7 @@ export default {
       })
     },
     handleEdit() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           updateItem(this.form)
@@ -297,6 +435,7 @@ export default {
       this.isEdit = true
       this.editIndex = index
       this.form = Object.assign({}, obj)
+      this.clearValidation()
       this.dialogFormVisible = true
     },
     handleSearch() {
@@ -307,7 +446,7 @@ export default {
       })
     },
     handleCreate() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           createItem(this.form)
@@ -331,6 +470,8 @@ export default {
     },
     openDialogForCreate() {
       this.form = {}
+      this.setToDefault()
+      this.clearValidation()
       this.isEdit = false
       this.dialogFormVisible = true
     },

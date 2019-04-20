@@ -1,17 +1,19 @@
 <template>
   <div class="navbar">
-    <hamburger :toggle-click="toggleSideBar" :is-active="sidebar.opened" class="hamburger-container"/>
-    <breadcrumb />
+    <hamburger
+      :toggle-click="toggleSideBar"
+      :is-active="sidebar.opened"
+      class="hamburger-container"
+    />
+    <breadcrumb/>
     <el-dropdown class="avatar-container" trigger="click">
       <div class="avatar-wrapper">
-        <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
+        <img src="@/assets/iamges/avatar.png" class="user-avatar">
         <i class="el-icon-caret-bottom"/>
       </div>
       <el-dropdown-menu slot="dropdown" class="user-dropdown">
         <router-link class="inlineBlock" to="/">
-          <el-dropdown-item>
-            Home
-          </el-dropdown-item>
+          <el-dropdown-item>Home</el-dropdown-item>
         </router-link>
         <el-dropdown-item divided>
           <span style="display:block;" @click="logout">LogOut</span>
@@ -25,17 +27,13 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-
 export default {
   components: {
     Breadcrumb,
     Hamburger
   },
   computed: {
-    ...mapGetters([
-      'sidebar',
-      'avatar'
-    ])
+    ...mapGetters(['sidebar', 'avatar'])
   },
   methods: {
     toggleSideBar() {
@@ -54,7 +52,7 @@ export default {
 .navbar {
   height: 50px;
   line-height: 50px;
-  box-shadow: 0 1px 3px 0 rgba(0,0,0,.12), 0 0 3px 0 rgba(0,0,0,.04);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
   .hamburger-container {
     line-height: 58px;
     height: 50px;
