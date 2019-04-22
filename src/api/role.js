@@ -32,7 +32,7 @@ export function createItem(item) {
 
 export function query(condition) {
   return request({
-    url: '/Roles/condition',
+    url: '/Roles/',
     method: 'get',
     params: condition
   })

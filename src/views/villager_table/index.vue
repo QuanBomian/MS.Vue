@@ -274,6 +274,13 @@ export default {
           { required: true, message: '请输入姓名', trigger: 'blur' },
           { min: 2, message: '长度至少为2', trigger: 'blur' }
         ],
+        maritalStatus: [
+          {
+            required: true,
+            message: '请选择婚姻状况',
+            trigger: 'blur'
+          }
+        ],
         birthday: [
           {
             required: true,
@@ -311,6 +318,20 @@ export default {
           },
           {
             validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
+        havingIllegalRecord: [
+          {
+            required: true,
+            message: '请选择',
+            trigger: 'blur'
+          }
+        ],
+        havingCriminalRecord: [
+          {
+            required: true,
+            message: '请选择',
             trigger: 'blur'
           }
         ]

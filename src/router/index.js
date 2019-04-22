@@ -158,21 +158,14 @@ export const constantRouterMap = [
         path: 'userInfo',
         name: 'UserInfo',
         component: () => import('@/views/userinfo/index'),
-        meta: { title: '账号管理', icon: '用户' },
-        children: [
-          {
-            path: 'password',
-            component: () => import('@/views/userinfo/password'),
-            name: 'Password',
-            meta: { title: '修改密码', icon: '密码' }
-          }
-        ]
+
+        meta: { title: '密码管理', icon: '用户' }
       },
       {
         path: 'userTable',
         name: 'UserTable',
         component: () => import('@/views/user_table/index'),
-        meta: { title: '用户信息管理', icon: '表格' }
+        meta: { title: '用户管理', icon: '表格' }
       },
       {
         path: 'roleTable',
@@ -181,10 +174,16 @@ export const constantRouterMap = [
         meta: { title: '角色管理', icon: '表格' }
       },
       {
-        path: 'authTable',
-        name: 'AuthTable',
-        component: () => import('@/views/auth_table/index'),
-        meta: { title: '授权管理', icon: '授权' }
+        path: 'userRoleTable',
+        name: 'UserRoleTable',
+        component: () => import('@/views/user_role_table/index'),
+        meta: { title: '用户角色管理', icon: '授权' }
+      },
+      {
+        path: 'roleResourceTable',
+        name: 'RoleResourceTable',
+        component: () => import('@/views/role_resource_table/index'),
+        meta: { title: '角色资源管理', icon: '授权' }
       }
     ]
   },

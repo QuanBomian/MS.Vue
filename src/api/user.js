@@ -6,7 +6,12 @@ export function getList() {
     method: 'get'
   })
 }
-
+export function get(id) {
+  return request({
+    url: '/Users/' + id,
+    method: 'get'
+  })
+}
 export function deleteItem(id) {
   return request({
     url: '/Users/' + id,

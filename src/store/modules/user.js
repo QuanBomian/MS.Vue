@@ -7,7 +7,8 @@ const user = {
     name: '',
     avatar: '',
     roles: [],
-    expTime: 0
+    expTime: 0,
+    userId: null
   },
 
   mutations: {
@@ -25,6 +26,9 @@ const user = {
     },
     SET_EXP: (state, expTime) => {
       state.expTime = expTime
+    },
+    SET_ID: (state, userId) => {
+      state.userId = userId
     }
   },
 
@@ -40,6 +44,7 @@ const user = {
               setToken(data.access)
               commit('SET_EXP', data.profile.expires)
               commit('SET_TOKEN', data.access)
+              commit('SET_ID', data.profile.userId)
 
               resolve()
             }
@@ -56,6 +61,7 @@ const user = {
         getInfo(state.token)
           .then(response => {
             const data = response.data
+            console.log(data)
             if (data.roleNames && data.roleNames.length > 0) {
               // 验证返回的roles是否是一个非空数组
               commit('SET_ROLES', data.roleNames)
@@ -108,7 +114,6 @@ const user = {
     // 前端 登出
     FedLogOut({ commit }) {
       return new Promise(resolve => {
-        commit('SET_TOKEN', '')
         removeToken()
         resolve()
       })

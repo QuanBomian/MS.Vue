@@ -92,7 +92,7 @@ export default {
         villageNumber: null,
         villageGroupNumber: null
       },
-      filterText: '',
+      filterText: '行政名称',
       data: [],
 
       defaultProps: {

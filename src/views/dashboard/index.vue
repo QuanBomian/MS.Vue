@@ -198,7 +198,7 @@ export default {
             :data="histogramChartData"
             :settings="histogramChartSettings"
             :mark-line="histogramChartMarkLine"
-          ></ve-histogram>
+          />
         </el-col>
         <el-col :span="12" class="echarts-item">
           <div class="content-title">系统访问情况</div>
@@ -206,15 +206,15 @@ export default {
             :data="lineChartData"
             :settings="lineChartSettings"
             :mark-point="lineChartMarkPoint"
-          ></ve-line>
+          />
         </el-col>
         <el-col :span="12" class="echarts-item">
           <div class="content-title">土地承包情况</div>
-          <ve-pie :data="pieChartData" :settings="pieChartSettings"></ve-pie>
+          <ve-pie :data="pieChartData" :settings="pieChartSettings"/>
         </el-col>
         <el-col :span="12" class="echarts-item">
           <div class="content-title">意见情况</div>
-          <ve-ring :data="ringChartData" :settings="ringChartSettings"></ve-ring>
+          <ve-ring :data="ringChartData" :settings="ringChartSettings"/>
         </el-col>
       </el-row>
     </el-scrollbar>

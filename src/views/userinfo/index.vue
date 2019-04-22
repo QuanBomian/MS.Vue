@@ -1,25 +1,22 @@
 <template>
-  <div>
-    <el-container>
-      <el-aside>
-        <el-menu
-          default-active="2"
-          class="el-menu-vertical-demo"
-          @open="handleOpen"
-          @close="handleClose"
-        >
-          <el-menu-item-group>
-            <el-menu-item index="1-1">修改密码</el-menu-item>
-          </el-menu-item-group>
-        </el-menu>
-      </el-aside>
-      <el-main>
-        <router-view/>
-      </el-main>
-    </el-container>
-  </div>
+  <el-form ref="form" :model="form" :rules="rules" status-icon label-width="100px">
+    <el-form-item label="密码" prop="password1">
+      <el-input v-model="form.password1" type="password" auto-complete="off"/>
+    </el-form-item>
+    <el-form-item label="确认密码" prop="password2">
+      <el-input v-model="form.password2" type="password" auto-complete="off"/>
+    </el-form-item>
+    <el-form-item label="新密码" prop="newPassword">
+      <el-input v-model="form.newPassword" type="password" auto-complete="off"/>
+    </el-form-item>
+    <el-form-item>
+      <el-button type="primary" @click="handleResetPassword">提交</el-button>
+      <el-button @click="resetForm('form')">重置</el-button>
+    </el-form-item>
+  </el-form>
 </template>
 <script>
+import { updateItem } from '@/api/user'
 export default {
   data() {
     var validatePass = (rule, value, callback) => {
@@ -45,16 +42,27 @@ export default {
       form: {
         password1: '',
         password2: '',
-        newPassword: ''
+        newPassword: '',
+        userId: null
       },
       rules: {
         password1: [
+          {
+            required: true,
+            message: '请输入密码',
+            trigger: 'blur'
+          },
           {
             validator: validatePass,
             trigger: 'blur'
           }
         ],
         password2: [
+          {
+            required: true,
+            message: '请再次输入密码',
+            trigger: 'blur'
+          },
           {
             validator: validatePass2,
             trigger: 'blur'
@@ -63,11 +71,30 @@ export default {
         newPassword: [
           {
             required: true,
+            min: 8,
             message: '请输入新密码',
             trigger: 'blur'
           }
         ]
       }
+    }
+  },
+  methods: {
+    resetForm(formName) {
+      this.$refs[formName].resetFields()
+    },
+    handleResetPassword() {
+      var user = {
+        password: this.form.newPassword,
+        userName: this.$store.getters.name,
+        userId: this.$store.getters.userId
+      }
+      updateItem(user).then(() => {
+        this.$message({
+          type: 'success',
+          message: '更改成功'
+        })
+      })
     }
   }
 }

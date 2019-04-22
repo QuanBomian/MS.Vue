@@ -31,7 +31,7 @@
       <el-table-column label="角色" width="160" align="center">
         <template slot-scope="scope">{{ scope.row.roleName }}</template>
       </el-table-column>
-      <el-table-column label="操作" align="center" fixed="right" width="200">
+      <el-table-column label="操作" align="center" fixed="right">
         <template slot-scope="scope">
           <el-button
             size="small"
@@ -60,16 +60,7 @@
 
 <script>
 import { getList, deleteItem, updateItem, createItem, query } from '@/api/role'
-import moment from 'moment'
 export default {
-  filters: {
-    dateString(value, format) {
-      return moment(value).format(format || 'YYYY年M月D日')
-    },
-    recordString(value) {
-      return value === true ? '是' : '否'
-    }
-  },
   data() {
     return {
       originList: null,
@@ -80,47 +71,15 @@ export default {
       isEdit: true,
       editIndex: null,
       search: {
-        username: null
+        roleName: null
       },
       form: {
-        userName: '',
-        password: '',
+        roleName: '',
         id: ''
       },
 
       rules: {
-        townName: [
-          { required: true, message: '请输入乡镇名', trigger: 'blur' }
-        ],
-
-        address: [
-          {
-            required: true,
-            message: '请输入地址',
-            trigger: 'blur'
-          }
-        ],
-        mayorName: [
-          {
-            required: true,
-            message: '请输入镇长姓名',
-            trigger: 'blur'
-          }
-        ],
-        secretaryName: [
-          {
-            required: true,
-            message: '请输入党委书记姓名',
-            trigger: 'blur'
-          }
-        ],
-        chairmanName: [
-          {
-            required: true,
-            message: '请输入人大委员长姓名',
-            trigger: 'blur'
-          }
-        ]
+        roleName: [{ required: true, message: '请输入角色名', trigger: 'blur' }]
       },
       formLabelWidth: '120px'
     }
@@ -136,7 +95,6 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true
-      console.log('123')
       getList().then(response => {
         this.list = response.items
         this.originList = response.items
@@ -144,7 +102,7 @@ export default {
       })
     },
     handleEdit() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           updateItem(this.form)
@@ -203,7 +161,7 @@ export default {
       })
     },
     handleCreate() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           createItem(this.form)

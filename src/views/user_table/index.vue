@@ -39,26 +39,38 @@
           <el-button
             size="small"
             type="primary"
-            @click="openDialogForEdit(scope.$index,scope.row)"
-          >编辑</el-button>
+            @click="openDialogForReset(scope.$index,scope.row)"
+          >重置密码</el-button>
           <el-button size="small" type="danger" @click="handleDelete(scope.$index)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
     <!-- 模态框 -->
-    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="乡镇信息">
+    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="用户信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
         <el-form-item :label-width="formLabelWidth" label="用户名" prop="userName">
           <el-input v-model="form.userName" auto-complete="off" placeholder="用户名"/>
+          <span>注：至少6位</span>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="密码" prop="password">
           <el-input v-model="form.password" auto-complete="off" placeholder="密码"/>
+          <span>注：至少8位</span>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button v-if="isEdit" type="primary" @click="handleEdit">更 新</el-button>
         <el-button v-else type="primary" @click="handleCreate">添 加</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog :visible.sync="resetDialogVisible" :before-close="handleClose" title="重置密码">
+      <el-form ref="resetPasswordForm" :rules="resetRules" :model="user">
+        <el-form-item :label-width="formLabelWidth" label="新密码" prop="password">
+          <el-input v-model="user.password" clearable/>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="handleReset">确认</el-button>
       </div>
     </el-dialog>
   </div>
@@ -74,8 +86,14 @@ export default {
       listLoading: true,
       dialogTableVisible: false,
       dialogFormVisible: false,
+      resetDialogVisible: false,
       isEdit: true,
       editIndex: null,
+      user: {
+        id: null,
+        userName: null,
+        password: null
+      },
       search: {
         username: null
       },
@@ -87,13 +105,24 @@ export default {
 
       rules: {
         userName: [
-          { required: true, message: '请输入用户名', trigger: 'blur' }
+          { required: true, min: 6, message: '请输入用户名', trigger: 'blur' }
         ],
 
         password: [
           {
             required: true,
+            min: 8,
             message: '请输入密码',
+            trigger: 'blur'
+          }
+        ]
+      },
+      resetRules: {
+        password: [
+          {
+            required: true,
+            min: 6,
+            message: '密码至少为6位',
             trigger: 'blur'
           }
         ]
@@ -112,15 +141,35 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true
-      console.log('123')
       getList().then(response => {
         this.list = response.items
         this.originList = response.items
         this.listLoading = false
       })
     },
+    handleReset() {
+      this.$refs['resetPasswordForm'].validate(valid => {
+        if (valid) {
+          this.resetDialogVisible = false
+          updateItem(this.user)
+            .then(() => {
+              this.fetchData()
+              this.$message({
+                type: 'success',
+                message: '更新成功'
+              })
+            })
+            .catch(() => {
+              this.$message({
+                type: 'info',
+                message: '已取消重置'
+              })
+            })
+        }
+      })
+    },
     handleEdit() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           updateItem(this.form)
@@ -171,15 +220,20 @@ export default {
       this.form = Object.assign({}, obj)
       this.dialogFormVisible = true
     },
+    openDialogForReset(index, obj) {
+      this.resetDialogVisible = true
+      this.user.id = obj.id
+      this.user.userName = obj.userName
+    },
     handleSearch() {
       this.listLoading = false
-      this.list = query(this.search).then(response => {
+      query(this.search).then(response => {
         this.list = response.list
         this.listLoading = false
       })
     },
     handleCreate() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           createItem(this.form)
