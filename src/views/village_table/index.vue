@@ -30,20 +30,8 @@
           <el-input v-model="search.areaNumber" placeholder="请输入行政编码" clearable/>
         </el-col>
         <el-col :span="8">
-          <el-input v-model="search.highAreaNumber" placeholder="请输入行政编码" clearable/>
+          <el-input v-model="search.highAreaNumber" placeholder="请输入上级行政编码" clearable/>
         </el-col>
-        <el-col :span="8">
-          <el-select v-model="search.governmentLevel" placeholder="请选择行政级别" clearable>
-            <el-option
-              v-for="item in options1"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-col>
-      </el-row>
-      <el-row :gutter="5" style="margin-top: 15px;">
         <el-col :span="6">
           <el-select v-model="search.urbanRuralClassification" placeholder="请选择城乡分类" clearable>
             <el-option
@@ -53,9 +41,6 @@
               :value="item.value"
             />
           </el-select>
-        </el-col>
-        <el-col :span="6">
-          <el-input v-model="search.groupCount" placeholder="请输入村民小组数量" clearable/>
         </el-col>
       </el-row>
       <el-row :gutter="5" style="margin-top: 15px;">
@@ -82,10 +67,13 @@
       <el-table-column label="村名" width="160" align="center">
         <template slot-scope="scope">{{ scope.row.villageName }}</template>
       </el-table-column>
+      <el-table-column label="上级行政编码" width="160" align="center">
+        <template slot-scope="scope">{{ scope.row.highLevelAreaNumber }}</template>
+      </el-table-column>
       <el-table-column label="行政编码" width="160" align="center">
         <template slot-scope="scope">{{ scope.row.areaNumber }}</template>
       </el-table-column>
-      <el-table-column label="行政级别" width="140" align="center">
+      <el-table-column label="行政级别" width="180" align="center">
         <template slot-scope="scope">{{ scope.row.governmentLevel|governmentLevelString }}</template>
       </el-table-column>
       <el-table-column label="地址" width="240" align="center">
@@ -97,7 +85,13 @@
       <el-table-column label="党委书记姓名" width="120" align="center">
         <template slot-scope="scope">{{ scope.row.secretaryName }}</template>
       </el-table-column>
-      <el-table-column label="城乡分类" width="120" align="center">
+      <el-table-column
+        label="城乡分类"
+        width="120"
+        align="center"
+        prop="urbanRuralClassification"
+        sortable
+      >
         <template slot-scope="scope">{{ scope.row.urbanRuralClassification }}</template>
       </el-table-column>
       <el-table-column label="村民小组数量" width="120" align="center">
@@ -113,10 +107,19 @@
             type="primary"
             @click="openDialogForEdit(scope.$index,scope.row)"
           >编辑</el-button>
-          <el-button size="small" type="danger" @click="handleDelete(scope.$index)">删除</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      :page-size.sync="pageSize"
+      :total="currentTotal"
+      :current-page.sync="currentPage"
+      :page-sizes="[10, 20, 30, 40]"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
     <!-- 模态框 -->
     <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="村信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
@@ -133,7 +136,7 @@
           <el-input v-model="form.areaNumber" auto-complete="off" placeholder="行政编码"/>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="行政级别" prop="governmentLevel">
-          <el-input v-model="form.governmentLevel" auto-complete="off" placeholder="行政级别"/>
+          <el-input v-model="form.governmentLevel" auto-complete="off" disabled placeholder="行政级别"/>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="村长姓名" prop="villageHeadName">
           <el-input v-model="form.villageHeadName" auto-complete="off" placeholder="村长姓名"/>
@@ -169,7 +172,7 @@
 
 <script>
 import {
-  getList,
+  getPagedList,
   deleteItem,
   updateItem,
   createItem,
@@ -202,7 +205,24 @@ export default {
         }
       }, 100)
     }
+    var checkNum = (rule, value, callback) => {
+      if (value) {
+        if (isNaN(value)) {
+          callback(new Error('请输入数字'))
+        } else {
+          if (value < 0) {
+            callback(new Error('不能小于0'))
+          } else {
+            callback()
+          }
+        }
+      }
+      callback()
+    }
     return {
+      currentPage: 1,
+      pageSize: 10,
+      currentTotal: 0,
       originList: null,
       list: null,
       listLoading: true,
@@ -285,6 +305,12 @@ export default {
       },
 
       rules: {
+        groupCount: [
+          {
+            validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
         villageName: [
           { required: true, message: '请输入村名', trigger: 'blur' }
         ],
@@ -309,6 +335,13 @@ export default {
           {
             required: true,
             message: '请输入行政级别',
+            trigger: 'blur'
+          }
+        ],
+        highLevelAreaNumber: [
+          {
+            required: true,
+            message: '请输入上级行政级别',
             trigger: 'blur'
           }
         ],
@@ -362,6 +395,12 @@ export default {
     this.fetchData()
   },
   methods: {
+    handleSizeChange() {
+      this.fetchData()
+    },
+    handleCurrentChange() {
+      this.fetchData()
+    },
     clearValidation() {
       if (this.$refs['ruleForm'] !== undefined) {
         this.$refs['ruleForm'].clearValidate()
@@ -369,9 +408,11 @@ export default {
     },
     fetchData() {
       this.listLoading = true
-      getList().then(response => {
-        this.list = response.items
-        this.originList = response.items
+      getPagedList(this.currentPage, this.pageSize).then(response => {
+        this.list = response.items.data
+        this.currentTotal = response.items.currentTotal
+        this.currentPage = response.items.pageIndex
+        this.originList = response.items.data
         this.listLoading = false
       })
     },
@@ -398,15 +439,15 @@ export default {
         }
       })
     },
-    handleDelete(index) {
+    handleDelete(obj) {
       this.$confirm('此操作将永久删除该项, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
         .then(() => {
-          deleteItem(this.list[index].id).then(() => {
-            this.list.splice(index, 1)
+          deleteItem(obj.id).then(() => {
+            this.fetchData()
             this.$message({
               type: 'success',
               message: '删除成功!'
@@ -430,7 +471,7 @@ export default {
     },
     handleSearch() {
       this.listLoading = false
-      this.list = query(this.search).then(response => {
+      query(this.search).then(response => {
         this.list = response.list
         this.listLoading = false
       })
@@ -461,7 +502,7 @@ export default {
     openDialogForCreate() {
       this.clearValidation()
       this.form = {}
-      console.log(this.form)
+      this.form.governmentLevel = 5
       this.isEdit = false
       this.dialogFormVisible = true
     },

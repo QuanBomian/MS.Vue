@@ -3,7 +3,7 @@
     <div style="margin-top: 15px;">
       <el-row :gutter="10" style="margin-buttom: 15px;" type="flex">
         <el-col :span="6">
-          <el-input v-model="search.partyMemberCode" placeholder="党员代码" clearable/>
+          <el-input v-model="search.memberCode" placeholder="党员代码" clearable/>
         </el-col>
 
         <el-col :span="10">
@@ -19,7 +19,7 @@
         </el-col>
 
         <el-col :span="8">
-          <el-select v-model="search.education" placeholder="请选择文化水平状况" clearable>
+          <el-select v-model="search.education" placeholder="请选择文化水平" clearable>
             <el-option
               v-for="item in educationOptions"
               :key="item.value"
@@ -142,6 +142,15 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      :page-size.sync="pageSize"
+      :total="currentTotal"
+      :current-page.sync="currentPage"
+      :page-sizes="[10, 20, 30, 40]"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
     <!-- 模态框 -->
     <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="党员信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
@@ -213,7 +222,7 @@
 
 <script>
 import {
-  getList,
+  getPagedList,
   deleteItem,
   updateItem,
   createItem,
@@ -231,6 +240,9 @@ export default {
   },
   data() {
     return {
+      currentPage: 1,
+      pageSize: 30,
+      currentTotal: 0,
       originList: null,
       list: null,
       listLoading: true,
@@ -239,7 +251,7 @@ export default {
       isEdit: true,
       editIndex: null,
       search: {
-        partyMemberCode: null,
+        memberCode: null,
         partymemberName: null,
         villageName: null,
         partyOrganizationName: null,
@@ -359,6 +371,12 @@ export default {
     this.fetchData()
   },
   methods: {
+    handleSizeChange() {
+      this.fetchData()
+    },
+    handleCurrentChange() {
+      this.fetchData()
+    },
     clickitem(e) {
       e === this.search.isFullMember
         ? (this.search.isFullMember = null)
@@ -379,9 +397,11 @@ export default {
     },
     fetchData() {
       this.listLoading = true
-      getList().then(response => {
-        this.list = response.items
-        this.originList = response.items
+      getPagedList(this.currentPage, this.pageSize).then(response => {
+        this.list = response.items.data
+        this.currentTotal = response.items.currentTotal
+        this.currentPage = response.items.pageIndex
+        this.originList = response.items.data
         this.listLoading = false
       })
     },

@@ -2,30 +2,21 @@ import request from '@/utils/request'
 
 export function getList() {
   return request({
-    url: '/VillagerGroups',
+    url: '/Menus',
     method: 'get'
-  })
-}
-export function getPagedList(pageIndex, pageSize) {
-  return request({
-    url: '/VillagerGroups',
-    params: {
-      pageIndex: pageIndex,
-      pageSize: pageSize
-    }
   })
 }
 
 export function deleteItem(id) {
   return request({
-    url: '/VillagerGroups/' + id,
+    url: '/Menus/' + id,
     method: 'delete'
   })
 }
 
 export function updateItem(item) {
   return request({
-    url: '/VillagerGroups/',
+    url: '/Menus/',
     method: 'put',
     data: item
   })
@@ -33,7 +24,7 @@ export function updateItem(item) {
 
 export function createItem(item) {
   return request({
-    url: '/VillagerGroups/',
+    url: '/Menus/',
     method: 'post',
     data: item
   })
@@ -41,7 +32,7 @@ export function createItem(item) {
 
 export function query(condition) {
   return request({
-    url: '/VillagerGroups',
+    url: '/Menus',
     method: 'get',
     params: condition
   })

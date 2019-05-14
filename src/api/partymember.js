@@ -6,6 +6,15 @@ export function getList() {
     method: 'get'
   })
 }
+export function getPagedList(pageIndex, pageSize) {
+  return request({
+    url: '/PartyMembers',
+    params: {
+      pageIndex: pageIndex,
+      pageSize: pageSize
+    }
+  })
+}
 
 export function deleteItem(id) {
   return request({
@@ -32,7 +41,7 @@ export function createItem(item) {
 
 export function query(condition) {
   return request({
-    url: '/PartyMembers/condition',
+    url: '/PartyMembers',
     method: 'get',
     params: condition
   })

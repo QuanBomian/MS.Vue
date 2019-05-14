@@ -47,9 +47,6 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="ID" width="80">
-        <template slot-scope="scope">{{ scope.$index }}</template>
-      </el-table-column>
       <el-table-column label="家庭代码" width="200" align="center">
         <template slot-scope="scope">{{ scope.row.familyCode }}</template>
       </el-table-column>
@@ -65,7 +62,7 @@
       <el-table-column label="村名" width="150" align="center">
         <template slot-scope="scope">{{ scope.row.villageName }}</template>
       </el-table-column>
-      <el-table-column label="村小组代码" width="150" align="center">
+      <el-table-column label="所属村民小组编码" width="150" align="center">
         <template slot-scope="scope">{{ scope.row.villageGroupCode }}</template>
       </el-table-column>
       <el-table-column label="人均年收入" width="220" align="center">
@@ -94,8 +91,17 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      :page-size.sync="pageSize"
+      :total="currentTotal"
+      :current-page.sync="currentPage"
+      :page-sizes="[10, 20, 30, 40]"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
     <!-- 模态框 -->
-    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="乡镇信息">
+    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="家庭信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
         <el-form-item :label-width="formLabelWidth" label="家庭代码" prop="familyCode">
           <el-input v-model="form.familyCode" auto-complete="off" placeholder="家庭代码"/>
@@ -112,8 +118,8 @@
         <el-form-item :label-width="formLabelWidth" label="所属村名" prop="villageName">
           <el-input v-model="form.villageName" auto-complete="off" placeholder="所属村名"/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="所属村民小组代码" prop="villageGroupCode">
-          <el-input v-model="form.villageGroupCode" auto-complete="off" placeholder="所属村民小组代码"/>
+        <el-form-item :label-width="formLabelWidth" label="所属村民小组编码" prop="villageGroupCode">
+          <el-input v-model="form.villageGroupCode" auto-complete="off" placeholder="所属村民小组编码"/>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="人均年收入" prop="averageAnnualIncome">
           <el-input v-model="form.averageAnnualIncome" auto-complete="off" placeholder="人均年收入"/>
@@ -148,22 +154,13 @@
 
 <script>
 import {
-  getList,
+  getPagedList,
   deleteItem,
   updateItem,
   createItem,
   query
 } from '@/api/family'
-import moment from 'moment'
 export default {
-  filters: {
-    dateString(value, format) {
-      return moment(value).format(format || 'YYYY年M月D日')
-    },
-    recordString(value) {
-      return value === true ? '是' : '否'
-    }
-  },
   data() {
     var checkNum = (rule, value, callback) => {
       if (!value) {
@@ -196,6 +193,9 @@ export default {
       }
     }
     return {
+      currentPage: 1,
+      pageSize: 30,
+      currentTotal: 0,
       originList: null,
       list: null,
       listLoading: true,
@@ -252,7 +252,7 @@ export default {
           { required: true, message: '请输入所属村名', trigger: 'blur' }
         ],
         villageGroupCode: [
-          { required: true, message: '请输入所属村名小组代码', trigger: 'blur' }
+          { required: true, message: '请输入所属村民小组编码', trigger: 'blur' }
         ],
         averageAnnualIncome: [
           { required: true, message: '请输入人均年收入', trigger: 'blur' },
@@ -301,15 +301,21 @@ export default {
       formLabelWidth: '120px'
     }
   },
-  watch: {
-    dialogFormVisible: function(val, oldVla) {
-      this.$refs['ruleForm'].resetFields()
-    }
-  },
   created() {
     this.fetchData()
   },
   methods: {
+    clearValidation() {
+      if (this.$refs['ruleForm'] !== undefined) {
+        this.$refs['ruleForm'].clearValidate()
+      }
+    },
+    handleSizeChange() {
+      this.fetchData()
+    },
+    handleCurrentChange() {
+      this.fetchData()
+    },
     clickitemPoor(e) {
       e === this.form.isPoor
         ? (this.form.isPoor = null)
@@ -322,14 +328,16 @@ export default {
     },
     fetchData() {
       this.listLoading = true
-      getList().then(response => {
-        this.list = response.items
-        this.originList = response.items
+      getPagedList(this.currentPage, this.pageSize).then(response => {
+        this.list = response.items.data
+        this.currentTotal = response.items.currentTotal
+        this.currentPage = response.items.pageIndex
+        this.originList = response.items.data
         this.listLoading = false
       })
     },
     handleEdit() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           updateItem(this.form)
@@ -375,6 +383,7 @@ export default {
     },
 
     openDialogForEdit(index, obj) {
+      this.clearValidation()
       this.isEdit = true
       this.editIndex = index
       this.form = Object.assign({}, obj)
@@ -382,13 +391,13 @@ export default {
     },
     handleSearch() {
       this.listLoading = false
-      this.list = query(this.search).then(response => {
+      query(this.search).then(response => {
         this.list = response.list
         this.listLoading = false
       })
     },
     handleCreate() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           createItem(this.form)
@@ -411,6 +420,7 @@ export default {
       })
     },
     openDialogForCreate() {
+      this.clearValidation()
       this.form = {}
       this.isEdit = false
       this.dialogFormVisible = true

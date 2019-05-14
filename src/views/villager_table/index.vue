@@ -3,7 +3,14 @@
     <div style="margin-top: 15px;">
       <el-row :gutter="10" style="margin-buttom: 15px;" type="flex">
         <el-col :span="6">
-          <el-input v-model="search.name" placeholder="请输入姓名" clearable/>
+          <el-autocomplete
+            v-model="search.name"
+            :fetch-suggestions="querySearch"
+            class="inline-input"
+            placeholder="请输入姓名"
+            clearable
+          />
+          <!-- <el-input v-model="search.name" placeholder="请输入姓名" clearable/> -->
         </el-col>
 
         <el-col :span="6">
@@ -35,7 +42,14 @@
       </el-row>
       <el-row :gutter="8" style="margin-top: 15px;">
         <el-col :span="6">
-          <el-input v-model="search.homeAddress" placeholder="请输入住址" clearable/>
+          <!-- <el-input v-model="search.homeAddress" placeholder="请输入住址" clearable/> -->
+          <el-autocomplete
+            v-model="search.homeAddress"
+            :fetch-suggestions="querySearch1"
+            class="inline-input"
+            placeholder="请输入地址"
+            clearable
+          />
         </el-col>
 
         <el-col :span="6">
@@ -96,37 +110,46 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="ID" width="80">
-        <template slot-scope="scope">{{ scope.$index }}</template>
-      </el-table-column>
-      <el-table-column label="姓名" width="80">
+      <el-table-column :sort-method="sortName" label="姓名" width="80" sortable prop="name">
         <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
-      <el-table-column label="出生日期" width="140" align="center">
+      <el-table-column label="出生日期" width="145" align="center" sortable prop="birthday">
         <template slot-scope="scope">
           <i class="el-icon-time"/>
           <span>{{ scope.row.birthday | dateString }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="性别" width="80" align="center">
+      <el-table-column label="性别" width="80" align="center" sortable prop="gender">
         <template slot-scope="scope">{{ scope.row.gender }}</template>
       </el-table-column>
       <el-table-column label="家庭住址" width="200" align="center">
         <template slot-scope="scope">{{ scope.row.homeAddress }}</template>
       </el-table-column>
-      <el-table-column label="学历" width="80" align="center">
+      <el-table-column label="学历" width="80" align="center" sortable prop="education">
         <template slot-scope="scope">{{ scope.row.education }}</template>
       </el-table-column>
-      <el-table-column label="年收入" width="80" align="center">
+      <el-table-column label="年收入" width="80" align="center" sortable prop="annualIncome">
         <template slot-scope="scope">{{ scope.row.annualIncome }}</template>
       </el-table-column>
       <el-table-column label="婚姻状况" width="80" align="center">
         <template slot-scope="scope">{{ scope.row.maritalStatus }}</template>
       </el-table-column>
-      <el-table-column label="有无违法记录" width="120" align="center">
+      <el-table-column
+        label="有无违法记录"
+        width="120"
+        align="center"
+        sortable
+        prop="havingIllegalRecord"
+      >
         <template slot-scope="scope">{{ scope.row.havingIllegalRecord | recordString }}</template>
       </el-table-column>
-      <el-table-column label="有无犯罪记录" width="120" align="center">
+      <el-table-column
+        label="有无犯罪记录"
+        width="120"
+        align="center"
+        sortable
+        prop="havingCriminalRecord"
+      >
         <template slot-scope="scope">{{ scope.row.havingCriminalRecord | recordString }}</template>
       </el-table-column>
       <el-table-column label="操作" align="center" fixed="right" width="200">
@@ -136,10 +159,19 @@
             type="primary"
             @click="openDialogForEdit(scope.$index,scope.row)"
           >编辑</el-button>
-          <el-button size="small" type="danger" @click="handleDelete(scope.$index)">删除</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(scope.$index,scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      :page-size.sync="pageSize"
+      :total="currentTotal"
+      :current-page.sync="currentPage"
+      :page-sizes="[15, 30, 50, 100]"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
     <!-- 模态框 -->
     <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="村民信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
@@ -150,8 +182,10 @@
           <el-date-picker v-model="form.birthday" type="date" placeholder="选择日期"/>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="性别" prop="gender">
-          <el-radio v-model="form.gender" label="男">男</el-radio>
-          <el-radio v-model="form.gender" label="女">女</el-radio>
+          <el-radio-group v-model="form.gender">
+            <el-radio label="男">男</el-radio>
+            <el-radio label="女">女</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="家庭住址" prop="homeAddress">
           <el-input v-model="form.homeAddress" auto-complete="off" placeholder="家庭住址"/>
@@ -203,11 +237,11 @@
 
 <script>
 import {
-  getList,
   deleteItem,
   updateItem,
   createItem,
-  query
+  query,
+  getPagedList
 } from '@/api/villager'
 import moment from 'moment'
 export default {
@@ -236,6 +270,9 @@ export default {
       }
     }
     return {
+      currentPage: 1,
+      pageSize: 30,
+      currentTotal: 0,
       originList: null,
       list: null,
       listLoading: true,
@@ -278,21 +315,21 @@ export default {
           {
             required: true,
             message: '请选择婚姻状况',
-            trigger: 'blur'
+            trigger: 'change'
           }
         ],
         birthday: [
           {
             required: true,
             message: '请选择日期',
-            trigger: 'blur'
+            trigger: 'change'
           }
         ],
         gender: [
           {
             required: true,
             message: '请选择性别',
-            trigger: 'blur'
+            trigger: 'change'
           }
         ],
         homeAddress: [
@@ -307,7 +344,7 @@ export default {
           {
             required: true,
             message: '请选择学历',
-            trigger: 'blur'
+            trigger: 'change'
           }
         ],
         annualIncome: [
@@ -325,14 +362,14 @@ export default {
           {
             required: true,
             message: '请选择',
-            trigger: 'blur'
+            trigger: 'change'
           }
         ],
         havingCriminalRecord: [
           {
             required: true,
             message: '请选择',
-            trigger: 'blur'
+            trigger: 'change'
           }
         ]
       },
@@ -359,7 +396,7 @@ export default {
           label: '本科'
         },
         {
-          value: '大专专科',
+          value: '大学专科',
           label: '大学专科'
         },
         {
@@ -396,15 +433,54 @@ export default {
       }
     }
   },
-  watch: {
-    dialogFormVisible: function(val, oldVla) {
-      this.$refs['ruleForm'].resetFields()
-    }
-  },
   created() {
     this.fetchData()
   },
   methods: {
+    clearValidation() {
+      if (this.$refs['ruleForm'] !== undefined) {
+        this.$refs['ruleForm'].clearValidate()
+      }
+    },
+    sortName(str1, str2) {
+      return str1.name.localeCompare(str2.name, 'zh')
+    },
+    querySearch(queryString, cb) {
+      var list = this.list
+      var results = queryString
+        ? list.filter(this.createFilter(queryString))
+        : list
+      for (var i = 0; i < results.length; i++) {
+        results[i].value = results[i].name
+      }
+      cb(results)
+    },
+    createFilter(queryString) {
+      return list => {
+        return list.name.indexOf(queryString) === 0
+      }
+    },
+    querySearch1(queryString, cb) {
+      var list = this.list
+      var results = queryString
+        ? list.filter(this.createFilter1(queryString))
+        : list
+      for (var i = 0; i < results.length; i++) {
+        results[i].value = results[i].homeAddress
+      }
+      cb(results)
+    },
+    createFilter1(queryString) {
+      return list => {
+        return list.homeAddress.indexOf(queryString) === 0
+      }
+    },
+    handleSizeChange() {
+      this.fetchData()
+    },
+    handleCurrentChange() {
+      this.fetchData()
+    },
     clickitemGender(e) {
       e === this.search.gender
         ? (this.search.gender = null)
@@ -422,9 +498,11 @@ export default {
     },
     fetchData() {
       this.listLoading = true
-      getList().then(response => {
-        this.list = response.items
-        this.originList = response.items
+      getPagedList(this.currentPage, this.pageSize).then(response => {
+        this.list = response.items.data
+        this.currentTotal = response.items.currentTotal
+        this.currentPage = response.items.pageIndex
+        this.originList = response.items.data
         this.listLoading = false
       })
     },
@@ -451,15 +529,15 @@ export default {
         }
       })
     },
-    handleDelete(index) {
+    handleDelete(index, obj) {
       this.$confirm('此操作将永久删除该项, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
         .then(() => {
-          deleteItem(this.list[index].id).then(() => {
-            this.list.splice(index, 1)
+          deleteItem(obj.id).then(() => {
+            this.fetchData()
             this.$message({
               type: 'success',
               message: '删除成功!'
@@ -475,15 +553,15 @@ export default {
     },
 
     openDialogForEdit(index, obj) {
+      this.clearValidation()
       this.isEdit = true
       this.editIndex = index
       this.form = Object.assign({}, obj)
-      this.clearValidation()
       this.dialogFormVisible = true
     },
     handleSearch() {
       this.listLoading = false
-      this.list = query(this.search).then(response => {
+      query(this.search).then(response => {
         this.list = response.list
         this.listLoading = false
       })
@@ -512,8 +590,8 @@ export default {
       })
     },
     openDialogForCreate() {
-      this.form = {}
       this.clearValidation()
+      this.form = {}
       this.isEdit = false
       this.dialogFormVisible = true
     },
@@ -523,11 +601,6 @@ export default {
           done()
         })
         .catch(_ => {})
-    },
-    clearValidation() {
-      if (this.$refs['ruleForm'] !== undefined) {
-        this.$refs['ruleForm'].clearValidate()
-      }
     }
   }
 }

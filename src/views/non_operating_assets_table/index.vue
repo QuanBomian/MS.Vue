@@ -6,26 +6,6 @@
           <el-input v-model="search.villageName" placeholder="所属村名" clearable/>
         </el-col>
 
-        <el-col :span="10">
-          <el-input v-model="search.officeBuildingNumber" placeholder="办公楼数量" clearable/>
-        </el-col>
-        <el-col :span="8">
-          <el-input v-model="search.sportsActivityRoomNumber" placeholder="文体活动中心数量" clearable/>
-        </el-col>
-      </el-row>
-      <el-row :gutter="8" style="margin-top: 15px;">
-        <el-col :span="8">
-          <el-input v-model="search.seniorCitizenCenterNumber" placeholder="老年人活动中心数量" clearable/>
-        </el-col>
-        <el-col :span="8">
-          <el-input v-model="search.staffQuartersNumber" placeholder="员工宿舍数量" clearable/>
-        </el-col>
-
-        <el-col :span="8">
-          <el-input v-model="search.libraryNumber" placeholder="图书馆数量" clearable/>
-        </el-col>
-      </el-row>
-      <el-row :gutter="5" style="margin-top: 15px;">
         <el-col :span="2">
           <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         </el-col>
@@ -94,6 +74,15 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      :page-size.sync="pageSize"
+      :total="currentTotal"
+      :current-page.sync="currentPage"
+      :page-sizes="[10, 20, 30, 40]"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
     <!-- 模态框 -->
     <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="村信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
@@ -169,7 +158,7 @@
 
 <script>
 import {
-  getList,
+  getPagedList,
   deleteItem,
   updateItem,
   createItem,
@@ -177,20 +166,24 @@ import {
 } from '@/api/non_operating_assets'
 export default {
   data() {
-    var checkPhone = (rule, value, callback) => {
-      var reg = /^((0\d{2,3})-)(\d{7,8})(-(\d{3,}))?$/
-      if (!value) {
-        callback(new Error('请输入联系电话'))
-      }
-      setTimeout(() => {
-        if (reg.test(value)) {
-          callback()
+    var checkNum = (rule, value, callback) => {
+      if (value) {
+        if (isNaN(value)) {
+          callback(new Error('请输入数字'))
         } else {
-          callback('请输入正确的格式：0区号-8位或7位号码[-分机号]')
+          if (value < 0) {
+            callback(new Error('不能小于0'))
+          } else {
+            callback()
+          }
         }
-      }, 100)
+      }
     }
+
     return {
+      currentPage: 1,
+      pageSize: 30,
+      currentTotal: 0,
       originList: null,
       list: null,
       listLoading: true,
@@ -199,26 +192,25 @@ export default {
       isEdit: true,
       editIndex: null,
       search: {
-        villageName: '',
-        officeBuildingNumber: null,
-        // officeBuildingArea: null,
-        serviceStationNumber: null,
-        // serviceStationArea: null,
-        SeniorCitizenCenterNumber: null,
-        // SeniorCitizenCenterArea: null,
-        SportsActivityRoomNumber: null,
-        // SportActivityRoomArea: null,
-        StaffQuartersNumber: null,
-        // StaffQuarterArea: null,
-        LibraryNumber: null
-        // LibaryCollectionsNumber: null
+        villageName: ''
+        // officeBuildingNumber: null,
+        // // officeBuildingArea: null,
+        // serviceStationNumber: null,
+        // // serviceStationArea: null,
+        // SeniorCitizenCenterNumber: null,
+        // // SeniorCitizenCenterArea: null,
+        // SportsActivityRoomNumber: null,
+        // // SportActivityRoomArea: null,
+        // StaffQuartersNumber: null,
+        // // StaffQuarterArea: null,
+        // LibraryNumber: null
+        // // LibaryCollectionsNumber: null
       },
       form: {
         villageName: '',
         officeBuildingNumber: 0,
         officeBuildingArea: 0,
         serviceStationNumber: 0,
-        serviceStationArea: 0,
         seniorCitizenCenterNumber: 0,
         seniorCitizenCenterArea: 0,
         sportsActivityRoomNumber: 0,
@@ -232,82 +224,147 @@ export default {
 
       rules: {
         villageName: [
-          { required: true, message: '请输入村名', trigger: 'blur' }
-        ],
-
-        address: [
           {
             required: true,
-            max: 100,
-            message: '请输入地址',
+            message: '请输入所属村名',
             trigger: 'blur'
           }
         ],
-        areaNumber: [
+        officeBuildingNumber: [
           {
             required: true,
-            max: 15,
-            message: '请输入行政区划编码',
-            trigger: 'blur'
-          }
-        ],
-        governmentLevel: [
-          {
-            required: true,
-            message: '请输入行政级别',
-            trigger: 'blur'
-          }
-        ],
-        villageHeadName: [
-          {
-            required: true,
-            min: 2,
-            message: '请输入村长姓名',
-            trigger: 'blur'
-          }
-        ],
-        secretaryName: [
-          {
-            required: true,
-            min: 2,
-            message: '请输入党委书记姓名',
-            trigger: 'blur'
-          }
-        ],
-        chairmanName: [
-          {
-            required: true,
-            min: 2,
-            message: '请输入人大委员长姓名',
-            trigger: 'blur'
-          }
-        ],
-        urbanRuralClassification: [
-          {
-            required: true,
-            message: '请选择城乡分类',
-            trigger: 'change'
-          }
-        ],
-        contactPhone: [
-          {
-            required: true,
-            message: '请输入联系电话',
+            message: '请输入办公楼数量',
             trigger: 'blur'
           },
           {
-            validator: checkPhone,
+            validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
+        officeBuildingArea: [
+          {
+            required: true,
+            message: '请输入办公楼面积',
+            trigger: 'blur'
+          },
+          {
+            validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
+        serviceStationNumber: [
+          {
+            required: true,
+            message: '请输入服务站数量',
+            trigger: 'blur'
+          },
+          {
+            validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
+        seniorCitizenCenterNumber: [
+          {
+            required: true,
+            message: '请输入办公楼面积',
+            trigger: 'blur'
+          },
+          {
+            validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
+        seniorCitizenCenterArea: [
+          {
+            required: true,
+            message: '请输入办公楼面积',
+            trigger: 'blur'
+          },
+          {
+            validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
+        sportsActivityRoomNumber: [
+          {
+            required: true,
+            message: '请输入办公楼面积',
+            trigger: 'blur'
+          },
+          {
+            validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
+        sportActivityRoomArea: [
+          {
+            required: true,
+            message: '请输入办公楼面积',
+            trigger: 'blur'
+          },
+          {
+            validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
+        libraryNumber: [
+          {
+            required: true,
+            message: '请输入办公楼面积',
+            trigger: 'blur'
+          },
+          {
+            validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
+        libaryCollectionsNumber: [
+          {
+            required: true,
+            message: '请输入办公楼面积',
+            trigger: 'blur'
+          },
+          {
+            validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
+        staffQuartersNumber: [
+          {
+            required: true,
+            message: '请输入办公楼面积',
+            trigger: 'blur'
+          },
+          {
+            validator: checkNum,
+            trigger: 'blur'
+          }
+        ],
+        staffQuarterArea: [
+          {
+            required: true,
+            message: '请输入办公楼面积',
+            trigger: 'blur'
+          },
+          {
+            validator: checkNum,
             trigger: 'blur'
           }
         ]
       },
-      formLabelWidth: '160px'
+      formLabelWidth: '180px'
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    handleSizeChange() {
+      this.fetchData()
+    },
+    handleCurrentChange() {
+      this.fetchData()
+    },
     clearValidation() {
       if (this.$refs['ruleForm'] !== undefined) {
         this.$refs['ruleForm'].clearValidate()
@@ -315,9 +372,11 @@ export default {
     },
     fetchData() {
       this.listLoading = true
-      getList().then(response => {
-        this.list = response.items
-        this.originList = response.items
+      getPagedList(this.currentPage, this.pageSize).then(response => {
+        this.list = response.items.data
+        this.currentTotal = response.items.currentTotal
+        this.currentPage = response.items.pageIndex
+        this.originList = response.items.data
         this.listLoading = false
       })
     },

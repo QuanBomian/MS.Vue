@@ -22,14 +22,10 @@
         </el-col>
 
         <el-col :span="8">
-          <el-input v-model="search.memberNumber" placeholder="请输入成员数量" clearable/>
-        </el-col>
-      </el-row>
-      <el-row :gutter="8" style="margin-top: 15px;">
-        <el-col :span="8">
           <el-input v-model="search.principalAddress" placeholder="请输入负责人家庭住址" clearable/>
         </el-col>
       </el-row>
+
       <el-row :gutter="5" style="margin-top: 15px;">
         <el-col :span="2">
           <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
@@ -83,6 +79,15 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      :page-size.sync="pageSize"
+      :total="currentTotal"
+      :current-page.sync="currentPage"
+      :page-sizes="[10, 20, 30, 40]"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
     <!-- 模态框 -->
     <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="村信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
@@ -119,7 +124,7 @@
 
 <script>
 import {
-  getList,
+  getPagedList,
   deleteItem,
   updateItem,
   createItem,
@@ -140,7 +145,36 @@ export default {
         }
       }, 100)
     }
+    var checkEmail = (rule, value, callback) => {
+      var reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/
+      if (!value) {
+        callback(new Error('请输入电子邮箱'))
+      }
+      setTimeout(() => {
+        if (reg.test(value)) {
+          callback()
+        } else {
+          callback('请输入正确的格式xxxxx@xxxxx.xxx')
+        }
+      }, 100)
+    }
+    var checkNum = (rule, value, callback) => {
+      if (value) {
+        if (isNaN(value)) {
+          callback(new Error('请输入数字'))
+        } else {
+          if (value < 0) {
+            callback(new Error('不能小于0'))
+          } else {
+            callback()
+          }
+        }
+      }
+    }
     return {
+      currentPage: 1,
+      pageSize: 30,
+      currentTotal: 0,
       originList: null,
       list: null,
       listLoading: true,
@@ -153,6 +187,7 @@ export default {
         principalPhone: null,
         principalEmail: null,
         principalName: null,
+        principalAddress: null,
         villageName: null,
         memberNumber: null
       },
@@ -162,70 +197,17 @@ export default {
         principalEmail: '',
         principalName: '',
         villageName: '',
+        principalAddress: '',
         memberNumber: null,
         id: ''
       },
 
       rules: {
-        villageName: [
-          { required: true, message: '请输入村名', trigger: 'blur' }
+        villageGroupCode: [
+          { required: true, message: '请输入村民小组编码', trigger: 'blur' }
         ],
 
-        address: [
-          {
-            required: true,
-            max: 100,
-            message: '请输入地址',
-            trigger: 'blur'
-          }
-        ],
-        areaNumber: [
-          {
-            required: true,
-            max: 15,
-            message: '请输入行政区划编码',
-            trigger: 'blur'
-          }
-        ],
-        governmentLevel: [
-          {
-            required: true,
-            message: '请输入行政级别',
-            trigger: 'blur'
-          }
-        ],
-        villageHeadName: [
-          {
-            required: true,
-            min: 2,
-            message: '请输入村长姓名',
-            trigger: 'blur'
-          }
-        ],
-        secretaryName: [
-          {
-            required: true,
-            min: 2,
-            message: '请输入党委书记姓名',
-            trigger: 'blur'
-          }
-        ],
-        chairmanName: [
-          {
-            required: true,
-            min: 2,
-            message: '请输入人大委员长姓名',
-            trigger: 'blur'
-          }
-        ],
-        urbanRuralClassification: [
-          {
-            required: true,
-            message: '请选择城乡分类',
-            trigger: 'change'
-          }
-        ],
-        contactPhone: [
+        principalPhone: [
           {
             required: true,
             message: '请输入联系电话',
@@ -233,6 +215,49 @@ export default {
           },
           {
             validator: checkPhone,
+            trigger: 'blur'
+          }
+        ],
+        principalEmail: [
+          {
+            required: true,
+            message: '请输入负责人电子邮箱',
+            trigger: 'blur'
+          },
+          {
+            validator: checkEmail,
+            trigger: 'blur'
+          }
+        ],
+        principalName: [
+          {
+            required: true,
+            message: '请输入负责人姓名',
+            trigger: 'blur'
+          }
+        ],
+        villageName: [
+          {
+            required: true,
+            message: '请输入所属村名',
+            trigger: 'blur'
+          }
+        ],
+        principalAddress: [
+          {
+            required: true,
+            message: '请输入负责人家庭住址',
+            trigger: 'blur'
+          }
+        ],
+        memberNumber: [
+          {
+            required: true,
+            message: '请输入成员数量',
+            trigger: 'blur'
+          },
+          {
+            validator: checkNum,
             trigger: 'blur'
           }
         ]
@@ -244,6 +269,12 @@ export default {
     this.fetchData()
   },
   methods: {
+    handleSizeChange() {
+      this.fetchData()
+    },
+    handleCurrentChange() {
+      this.fetchData()
+    },
     clearValidation() {
       if (this.$refs['ruleForm'] !== undefined) {
         this.$refs['ruleForm'].clearValidate()
@@ -251,9 +282,11 @@ export default {
     },
     fetchData() {
       this.listLoading = true
-      getList().then(response => {
-        this.list = response.items
-        this.originList = response.items
+      getPagedList(this.currentPage, this.pageSize).then(response => {
+        this.list = response.items.data
+        this.currentTotal = response.items.currentTotal
+        this.currentPage = response.items.pageIndex
+        this.originList = response.items.data
         this.listLoading = false
       })
     },

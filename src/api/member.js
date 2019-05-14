@@ -7,6 +7,15 @@ export function getList() {
   })
 }
 
+export function getPagedList(pageIndex, pageSize) {
+  return request({
+    url: '/Members',
+    params: {
+      pageIndex: pageIndex,
+      pageSize: pageSize
+    }
+  })
+}
 export function deleteItem(id) {
   return request({
     url: '/Members/' + id,
@@ -32,7 +41,7 @@ export function createItem(item) {
 
 export function query(condition) {
   return request({
-    url: '/Members/condition',
+    url: '/Members',
     method: 'get',
     params: condition
   })

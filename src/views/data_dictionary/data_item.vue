@@ -67,10 +67,10 @@
             placeholder="数据类别编码"
           />
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="数据项编码" prop="categroyCode">
-          <el-input v-model="form.itemCode" auto-complete="off" placeholder="数据类别编码"/>
+        <el-form-item :label-width="formLabelWidth" label="数据项编码" prop="itemCode">
+          <el-input v-model="form.itemCode" auto-complete="off" placeholder="数据项编码"/>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="内容" prop="categroyName">
+        <el-form-item :label-width="formLabelWidth" label="内容" prop="content">
           <el-input v-model="form.content" auto-complete="off" placeholder="数据类别名称"/>
         </el-form-item>
       </el-form>
@@ -102,7 +102,23 @@ export default {
       dialogFormVisible: false,
       isEdit: true,
       editIndex: null,
-      rules: {},
+      currentCategroyCode: '',
+      rules: {
+        content: [
+          {
+            required: true,
+            message: '请输入内容',
+            trigger: 'blur'
+          }
+        ],
+        itemCode: [
+          {
+            required: true,
+            message: '请输入数据项编码',
+            trigger: 'blur'
+          }
+        ]
+      },
       search: {
         key: null,
         categroyCode: null
@@ -113,7 +129,6 @@ export default {
         content: '',
         id: ''
       },
-
       categroies: [],
       tableData: []
     }
@@ -131,6 +146,7 @@ export default {
       this.listLoading = true
       getListsByCategroyId(id).then(reponse => {
         this.tableData = reponse.list
+        this.currentCategroyCode = id
         this.listLoading = false
       })
     },
@@ -140,6 +156,7 @@ export default {
         this.categroies = reponse.items
         getListsByCategroyId(reponse.items[0].categroyCode).then(reponse => {
           this.tableData = reponse.list
+          this.currentCategroyCode = this.tableData[0].categroyCode
           this.listLoading = false
         })
       })
@@ -239,11 +256,7 @@ export default {
     },
     openDialogForCreate() {
       this.form = {}
-      Object.assign(this.form, {
-        itemCode: '',
-        content: '',
-        categroyCode: this.tableData[0].categroyCode
-      })
+      this.form.categroyCode = this.currentCategroyCode
       this.clearValidation()
       this.isEdit = false
       this.dialogFormVisible = true

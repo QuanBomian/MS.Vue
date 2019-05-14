@@ -46,7 +46,7 @@
     <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="角色">
       <el-form ref="ruleForm" :model="form" :rules="rules">
         <el-form-item :label-width="formLabelWidth" label="角色" prop="roleName">
-          <el-input v-model="form.roleName" auto-complete="off" placeholder="用户名"/>
+          <el-input v-model="form.roleName" auto-complete="off" placeholder="角色名"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -84,15 +84,15 @@ export default {
       formLabelWidth: '120px'
     }
   },
-  watch: {
-    dialogFormVisible: function(val, oldVla) {
-      this.$refs['ruleForm'].resetFields()
-    }
-  },
   created() {
     this.fetchData()
   },
   methods: {
+    clearValidation() {
+      if (this.$refs['ruleForm'] !== undefined) {
+        this.$refs['ruleForm'].clearValidate()
+      }
+    },
     fetchData() {
       this.listLoading = true
       getList().then(response => {
@@ -148,6 +148,7 @@ export default {
     },
 
     openDialogForEdit(index, obj) {
+      this.clearValidation()
       this.isEdit = true
       this.editIndex = index
       this.form = Object.assign({}, obj)
@@ -155,7 +156,7 @@ export default {
     },
     handleSearch() {
       this.listLoading = false
-      this.list = query(this.search).then(response => {
+      query(this.search).then(response => {
         this.list = response.list
         this.listLoading = false
       })
@@ -184,6 +185,7 @@ export default {
       })
     },
     openDialogForCreate() {
+      this.clearValidation()
       this.form = {}
       this.isEdit = false
       this.dialogFormVisible = true

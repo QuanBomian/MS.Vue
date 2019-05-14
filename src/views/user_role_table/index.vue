@@ -28,10 +28,10 @@
       fit
       highlight-current-row
     >
-      <el-table-column label="用户名" width="160" align="center">
+      <el-table-column label="用户名" align="center">
         <template slot-scope="scope">{{ scope.row.user.userName }}</template>
       </el-table-column>
-      <el-table-column label="授权" width="500" align="center">
+      <el-table-column label="授权" align="center">
         <template slot-scope="scope">{{ scope.row.role.roleName }}</template>
       </el-table-column>
       <el-table-column label="操作" align="center" fixed="right" width="200">
@@ -46,13 +46,39 @@
       </el-table-column>
     </el-table>
     <!-- 模态框 -->
-    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="乡镇信息">
+    <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="用户角色信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
-        <el-form-item :label-width="formLabelWidth" label="用户名" prop="userName">
-          <el-input v-model="form.user.userName" auto-complete="off" placeholder="用户名"/>
+        <el-form-item :label-width="formLabelWidth" label="用户名" prop="user.userName">
+          <el-select
+            v-model="form.user.userName"
+            value-key="id"
+            placeholder="请选择用户名"
+            @change="currentUserSel"
+          >
+            <el-option
+              v-for="item in userNameOptions"
+              :key="item.id"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+          <!-- <el-input v-model="form.user.userName" auto-complete="off" placeholder="用户名"/> -->
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="密码" prop="roleName">
-          <el-input v-model="form.role.roleName" auto-complete="off" placeholder="密码"/>
+        <el-form-item :label-width="formLabelWidth" label="角色名" prop="role.roleName">
+          <el-select
+            v-model="form.role.roleName"
+            value-key="id"
+            placeholder="请选择角色名"
+            @change="currentRoleSel"
+          >
+            <el-option
+              v-for="item in roleNameOptions"
+              :key="item.id"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+          <!-- <el-input v-model="form.role.roleName" auto-complete="off" placeholder="角色名"/> -->
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -72,16 +98,9 @@ import {
   createItem,
   query
 } from '@/api/auth_user'
-import moment from 'moment'
+import * as userApi from '@/api/user'
+import * as roleApi from '@/api/role'
 export default {
-  filters: {
-    dateString(value, format) {
-      return moment(value).format(format || 'YYYY年M月D日')
-    },
-    recordString(value) {
-      return value === true ? '是' : '否'
-    }
-  },
   data() {
     return {
       originList: null,
@@ -92,7 +111,7 @@ export default {
       isEdit: true,
       editIndex: null,
       search: {
-        username: null
+        userName: null
       },
       form: {
         user: {
@@ -107,56 +126,66 @@ export default {
         roleId: '',
         id: ''
       },
-
+      userNameOptions: [],
+      roleNameOptions: [],
       rules: {
-        townName: [
-          { required: true, message: '请输入乡镇名', trigger: 'blur' }
-        ],
-
-        address: [
+        'user.userName': [
           {
             required: true,
-            message: '请输入地址',
-            trigger: 'blur'
+            message: '请输入用户名',
+            trigger: 'change'
           }
         ],
-        mayorName: [
+        'role.roleName': [
           {
             required: true,
-            message: '请输入镇长姓名',
-            trigger: 'blur'
-          }
-        ],
-        secretaryName: [
-          {
-            required: true,
-            message: '请输入党委书记姓名',
-            trigger: 'blur'
-          }
-        ],
-        chairmanName: [
-          {
-            required: true,
-            message: '请输入人大委员长姓名',
-            trigger: 'blur'
+            message: '请输入角色名',
+            trigger: 'change'
           }
         ]
       },
       formLabelWidth: '120px'
     }
   },
-  watch: {
-    dialogFormVisible: function(val, oldVla) {
-      this.$refs['ruleForm'].resetFields()
-    }
-  },
+
   created() {
     this.fetchData()
+    this.fetchOptions()
   },
   methods: {
+    currentUserSel(selVal) {
+      var user = this.userNameOptions.find(item => item.userName === selVal)
+      this.form.userId = user.id
+    },
+    currentRoleSel(selVal) {
+      var role = this.roleNameOptions.find(item => item.roleName === selVal)
+      this.form.roleId = role.id
+    },
+    clearValidation() {
+      if (this.$refs['ruleForm'] !== undefined) {
+        this.$refs['ruleForm'].clearValidate()
+      }
+    },
+    fetchOptions() {
+      userApi.getList().then(response => {
+        var options = response.items
+        for (var i = 0; i < options.length; i++) {
+          options[i].value = options[i].userName
+          options[i].label = options[i].userName
+        }
+        this.userNameOptions = options
+      })
+      roleApi.getList().then(response => {
+        var options = response.items
+        for (var i = 0; i < options.length; i++) {
+          options[i].value = options[i].roleName
+          options[i].label = options[i].roleName
+        }
+        this.roleNameOptions = options
+      })
+    },
     fetchData() {
       this.listLoading = true
-      console.log('123')
       getList().then(response => {
         this.list = response.items
         this.originList = response.items
@@ -164,7 +193,7 @@ export default {
       })
     },
     handleEdit() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
           updateItem(this.form)
@@ -210,6 +239,7 @@ export default {
     },
 
     openDialogForEdit(index, obj) {
+      this.clearValidation()
       this.isEdit = true
       this.editIndex = index
       this.form = Object.assign({}, obj)
@@ -217,16 +247,19 @@ export default {
     },
     handleSearch() {
       this.listLoading = false
-      this.list = query(this.search).then(response => {
+      query(this.search).then(response => {
         this.list = response.list
         this.listLoading = false
       })
     },
     handleCreate() {
-      this.$ref['ruleForm'].validate(valid => {
+      this.$refs['ruleForm'].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
-          createItem(this.form)
+          var userRole = {}
+          userRole.userId = this.form.userId
+          userRole.roleId = this.form.roleId
+          createItem(userRole)
             .then(() => {
               this.fetchData()
               this.$message({
@@ -246,7 +279,9 @@ export default {
       })
     },
     openDialogForCreate() {
-      this.form = {}
+      this.clearValidation()
+      this.form.user = {}
+      this.form.role = {}
       this.isEdit = false
       this.dialogFormVisible = true
     },

@@ -26,7 +26,13 @@ export function updateItem(item) {
     data: item
   })
 }
-
+export function resetPassword(user) {
+  return request({
+    url: '/Users/Reset',
+    method: 'put',
+    data: user
+  })
+}
 export function createItem(item) {
   return request({
     url: '/Users/',
@@ -37,7 +43,7 @@ export function createItem(item) {
 
 export function query(condition) {
   return request({
-    url: '/Users/condition',
+    url: '/Users',
     method: 'get',
     params: condition
   })

@@ -3,44 +3,78 @@
     <div style="margin-top: 15px;">
       <el-row :gutter="10" style="margin-buttom: 15px;" type="flex">
         <el-col :span="6">
-          <el-input v-model="search.townName" placeholder="请输入乡镇名" clearable/>
+          <!-- <el-input v-model="search.townName" placeholder="请输入乡镇名" clearable/> -->
+          <el-autocomplete
+            v-model="search.townName"
+            :fetch-suggestions="querySearch"
+            class="inline-input"
+            placeholder="请输入乡镇名"
+            clearable
+          />
         </el-col>
 
-        <el-col :span="10">
-          <el-input v-model="search.address" placeholder="请输入地址"/>
+        <el-col :span="6">
+          <!-- <el-input v-model="search.address" placeholder="请输入地址"/> -->
+          <el-autocomplete
+            v-model="search.address"
+            :fetch-suggestions="querySearch1"
+            class="inline-input"
+            placeholder="请输入地址"
+            clearable
+          />
+        </el-col>
+        <el-col :span="6">
+          <!-- <el-input v-model="search.mayorName" placeholder="请输入镇长姓名"/> -->
+          <el-autocomplete
+            v-model="search.mayorName"
+            :fetch-suggestions="querySearch2"
+            class="inline-input"
+            placeholder="请输入镇长姓名"
+            clearable
+          />
+        </el-col>
+        <el-col :span="6">
+          <!-- <el-input v-model="search.secretaryName" placeholder="请输入党委书记姓名"/> -->
+          <el-autocomplete
+            v-model="search.secretaryName"
+            :fetch-suggestions="querySearch3"
+            class="inline-input"
+            placeholder="请输入党委书记姓名"
+            clearable
+          />
         </el-col>
         <el-col :span="8">
-          <el-input v-model="search.mayorName" placeholder="请输入镇长姓名"/>
+          <!-- <el-input v-model="search.chairmanName" placeholder="请输入人大委员长姓名" clearable/> -->
+          <el-autocomplete
+            v-model="search.chairmanName"
+            :fetch-suggestions="querySearch4"
+            class="inline-input"
+            placeholder="请输入人大委员长姓名"
+            clearable
+          />
         </el-col>
       </el-row>
       <el-row :gutter="8" style="margin-top: 15px;">
-        <el-col :span="8">
-          <el-input v-model="search.secretaryName" placeholder="请输入党委书记姓名"/>
+        <el-col :span="6">
+          <!-- <el-input v-model="search.contactPhone" placeholder="请输入联系电话" clearable/> -->
+          <el-autocomplete
+            v-model="search.contactPhone"
+            :fetch-suggestions="querySearch5"
+            class="inline-input"
+            placeholder="请输入联系电话"
+            clearable
+          />
         </el-col>
-        <el-col :span="8">
-          <el-input v-model="search.chairmanName" placeholder="请输入人大委员长姓名" clearable/>
+        <el-col :span="6">
+          <!-- <el-input v-model="search.areaNumber" placeholder="请输入行政编码"/> -->
+          <el-autocomplete
+            v-model="search.areaNumber"
+            :fetch-suggestions="querySearch6"
+            class="inline-input"
+            placeholder="请输入行政编码"
+            clearable
+          />
         </el-col>
-
-        <el-col :span="8">
-          <el-input v-model="search.contactPhone" placeholder="请输入联系电话" clearable/>
-        </el-col>
-      </el-row>
-      <el-row :gutter="8" style="margin-top: 15px;">
-        <el-col :span="8">
-          <el-input v-model="search.areaNumber" placeholder="请输入行政编码"/>
-        </el-col>
-        <el-col :span="8">
-          <el-select v-model="search.governmentLevel" placeholder="请输入行政级别" clearable>
-            <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-col>
-      </el-row>
-      <el-row :gutter="5" style="margin-top: 30px;">
         <el-col :span="2">
           <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
         </el-col>
@@ -61,17 +95,14 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="ID" width="80">
-        <template slot-scope="scope">{{ scope.$index }}</template>
-      </el-table-column>
       <el-table-column label="乡镇名" width="160" align="center">
         <template slot-scope="scope">{{ scope.row.townName }}</template>
       </el-table-column>
       <el-table-column label="行政编码" width="160" align="center">
         <template slot-scope="scope">{{ scope.row.areaNumber }}</template>
       </el-table-column>
-      <el-table-column label="行政级别" width="40" align="center">
-        <template slot-scope="scope">{{ scope.row.governmentLevel }}</template>
+      <el-table-column label="行政级别" width="120" align="center">
+        <template slot-scope="scope">{{ scope.row.governmentLevel|governmentLevelString }}</template>
       </el-table-column>
       <el-table-column label="地址" width="240" align="center">
         <template slot-scope="scope">{{ scope.row.address }}</template>
@@ -99,6 +130,15 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      :page-size.sync="pageSize"
+      :total="currentTotal"
+      :current-page.sync="currentPage"
+      :page-sizes="[10, 20, 30, 40]"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
     <!-- 模态框 -->
     <el-dialog :visible.sync="dialogFormVisible" :before-close="handleClose" title="乡镇信息">
       <el-form ref="ruleForm" :model="form" :rules="rules">
@@ -112,7 +152,7 @@
           <el-input v-model="form.areaNumber" auto-complete="off" placeholder="行政编码"/>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="行政级别" prop="governmentLevel">
-          <el-input v-model="form.governmentLevel" auto-complete="off" placeholder="行政级别"/>
+          <el-input v-model="form.governmentLevel" auto-complete="off" placeholder="行政级别" disabled/>
         </el-form-item>
         <el-form-item :label-width="formLabelWidth" label="镇长姓名" prop="mayorName">
           <el-input v-model="form.mayorName" auto-complete="off" placeholder="镇长姓名"/>
@@ -137,10 +177,44 @@
 </template>
 
 <script>
-import { getList, deleteItem, updateItem, createItem, query } from '@/api/town'
+import {
+  getPagedList,
+  deleteItem,
+  updateItem,
+  createItem,
+  query
+} from '@/api/town'
+var governmentLevelMap = new Map([
+  [1, '省级'],
+  [2, '地级'],
+  [3, '县级'],
+  [4, '乡级'],
+  [5, '村级']
+])
 export default {
+  filters: {
+    governmentLevelString(oldVal) {
+      return governmentLevelMap.get(oldVal)
+    }
+  },
   data() {
+    var checkPhone = (rule, value, callback) => {
+      var reg = /^((0\d{2,3})-)(\d{7,8})(-(\d{3,}))?$/
+      if (!value) {
+        callback(new Error('请输入联系电话'))
+      }
+      setTimeout(() => {
+        if (reg.test(value)) {
+          callback()
+        } else {
+          callback('请输入正确的格式：0区号-8位或7位号码[-分机号]')
+        }
+      }, 100)
+    }
     return {
+      currentPage: 1,
+      pageSize: 30,
+      currentTotal: 0,
       originList: null,
       list: null,
       listLoading: true,
@@ -224,6 +298,24 @@ export default {
             message: '请输入人大委员长姓名',
             trigger: 'blur'
           }
+        ],
+        areaNumber: [
+          {
+            required: true,
+            message: '请输入行政编码',
+            trigger: 'blur'
+          }
+        ],
+        contactPhone: [
+          {
+            required: true,
+            message: '请输入联系电话',
+            trigger: 'blur'
+          },
+          {
+            validator: checkPhone,
+            trigger: 'blur'
+          }
         ]
       },
       formLabelWidth: '120px'
@@ -233,6 +325,117 @@ export default {
     this.fetchData()
   },
   methods: {
+    querySearch(queryString, cb) {
+      var list = this.list
+      var results = queryString
+        ? list.filter(this.createFilter(queryString))
+        : list
+      for (var i = 0; i < results.length; i++) {
+        results[i].value = results[i].townName
+      }
+      cb(results)
+    },
+    createFilter(queryString) {
+      return list => {
+        return list.townName.indexOf(queryString) === 0
+      }
+    },
+    querySearch1(queryString, cb) {
+      var list = this.list
+      var results = queryString
+        ? list.filter(this.createFilter(queryString))
+        : list
+      for (var i = 0; i < results.length; i++) {
+        results[i].value = results[i].address
+      }
+      cb(results)
+    },
+    createFilter1(queryString) {
+      return list => {
+        return list.address.indexOf(queryString) === 0
+      }
+    },
+    querySearch2(queryString, cb) {
+      var list = this.list
+      var results = queryString
+        ? list.filter(this.createFilter(queryString))
+        : list
+      for (var i = 0; i < results.length; i++) {
+        results[i].value = results[i].mayorName
+      }
+      cb(results)
+    },
+    createFilter2(queryString) {
+      return list => {
+        return list.mayorName.indexOf(queryString) === 0
+      }
+    },
+    querySearch3(queryString, cb) {
+      var list = this.list
+      var results = queryString
+        ? list.filter(this.createFilter(queryString))
+        : list
+      for (var i = 0; i < results.length; i++) {
+        results[i].value = results[i].secretaryName
+      }
+      cb(results)
+    },
+    createFilter3(queryString) {
+      return list => {
+        return list.secretaryName.indexOf(queryString) === 0
+      }
+    },
+    querySearch4(queryString, cb) {
+      var list = this.list
+      var results = queryString
+        ? list.filter(this.createFilter(queryString))
+        : list
+      for (var i = 0; i < results.length; i++) {
+        results[i].value = results[i].chairmanName
+      }
+      cb(results)
+    },
+    createFilter4(queryString) {
+      return list => {
+        return list.chairmanName.indexOf(queryString) === 0
+      }
+    },
+    querySearch5(queryString, cb) {
+      var list = this.list
+      var results = queryString
+        ? list.filter(this.createFilter(queryString))
+        : list
+      for (var i = 0; i < results.length; i++) {
+        results[i].value = results[i].contactPhone
+      }
+      cb(results)
+    },
+    createFilter5(queryString) {
+      return list => {
+        return list.contactPhone.indexOf(queryString) === 0
+      }
+    },
+    querySearch6(queryString, cb) {
+      var list = this.list
+      var results = queryString
+        ? list.filter(this.createFilter(queryString))
+        : list
+      for (var i = 0; i < results.length; i++) {
+        results[i].value = results[i].areaNumber
+      }
+      cb(results)
+    },
+    createFilter6(queryString) {
+      return list => {
+        return list.areaNumber.indexOf(queryString) === 0
+      }
+    },
+    handleSizeChange() {
+      this.fetchData()
+    },
+    handleCurrentChange() {
+      this.fetchData()
+    },
     clearValidation() {
       if (this.$refs['ruleForm'] !== undefined) {
         this.$refs['ruleForm'].clearValidate()
@@ -240,9 +443,11 @@ export default {
     },
     fetchData() {
       this.listLoading = true
-      getList().then(response => {
-        this.list = response.items
-        this.originList = response.items
+      getPagedList(this.currentPage, this.pageSize).then(response => {
+        this.list = response.items.data
+        this.currentTotal = response.items.currentTotal
+        this.currentPage = response.items.pageIndex
+        this.originList = response.items.data
         this.listLoading = false
       })
     },
@@ -301,7 +506,7 @@ export default {
     },
     handleSearch() {
       this.listLoading = false
-      this.list = query(this.search).then(response => {
+      query(this.search).then(response => {
         this.list = response.list
         this.listLoading = false
       })
@@ -331,6 +536,7 @@ export default {
     },
     openDialogForCreate() {
       this.form = {}
+      this.form.governmentLevel = 4
       this.clearValidation()
       this.isEdit = false
       this.dialogFormVisible = true

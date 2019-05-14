@@ -188,6 +188,21 @@ export const constantRouterMap = [
     ]
   },
   {
+    path: '/file',
+    component: Layout,
+    name: 'File',
+    redirect: '/file/download',
+    meta: { title: '档案文件' },
+    children: [
+      {
+        path: 'download',
+        name: 'Download',
+        component: () => import('@/views/file_download/index'),
+        meta: { title: '文件下载', icon: '下载' }
+      }
+    ]
+  },
+  {
     path: 'external-link',
     component: Layout,
     children: [
